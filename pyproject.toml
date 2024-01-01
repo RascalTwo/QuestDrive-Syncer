@@ -9,10 +9,12 @@ readme = "README.md"
 test = "pytest --cov=questdrive_syncer"
 lint = "ruff check"
 format = "ruff format"
+typecheck = "mypy --strict questdrive_syncer"
 
 [tool.poetry.dependencies]
 python = "^3.9"
 ruff = "^0.1.9"
+mypy = "^1.8.0"
 
 
 [tool.poetry.group.dev.dependencies]
