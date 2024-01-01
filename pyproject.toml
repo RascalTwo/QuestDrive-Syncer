@@ -5,9 +5,17 @@ description = ""
 authors = ["Rascal_Two <therealrascaltwo@gmail.com>"]
 readme = "README.md"
 
+[tool.poe.tasks]
+test = "pytest --cov=questdrive_syncer"
+
 [tool.poetry.dependencies]
 python = "^3.9"
 
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.4"
+poethepoet = "^0.24.4"
+pytest-cov = "^4.1.0"
 
 [build-system]
 requires = ["poetry-core"]
