@@ -6,7 +6,7 @@ authors = ["Rascal_Two <therealrascaltwo@gmail.com>"]
 readme = "README.md"
 
 [tool.poe.tasks]
-test = "pytest --cov=questdrive_syncer"
+test = "pytest --cov=questdrive_syncer --typeguard-packages=questdrive_syncer"
 lint = "ruff check"
 format = "ruff format"
 typecheck = "mypy --strict questdrive_syncer"
@@ -15,6 +15,7 @@ typecheck = "mypy --strict questdrive_syncer"
 python = "^3.9"
 ruff = "^0.1.9"
 mypy = "^1.8.0"
+typeguard = "^4.1.5"
 
 
 [tool.poetry.group.dev.dependencies]
