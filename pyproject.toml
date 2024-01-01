@@ -7,9 +7,12 @@ readme = "README.md"
 
 [tool.poe.tasks]
 test = "pytest --cov=questdrive_syncer"
+lint = "ruff check"
+format = "ruff format"
 
 [tool.poetry.dependencies]
 python = "^3.9"
+ruff = "^0.1.9"
 
 
 [tool.poetry.group.dev.dependencies]
