@@ -1,4 +1,6 @@
 ---
+fail_fast: true
+
 repos:
     - repo: https://github.com/pre-commit/pre-commit-hooks
       rev: v3.2.0
@@ -35,13 +37,20 @@ repos:
           - id: ruff
             args: [--fix]
           - id: ruff-format
-    - repo: https://github.com/pre-commit/mirrors-mypy
-      rev: v1.8.0
-      hooks:
-          - id: mypy
-            args: [--strict]
     - repo: local
       hooks:
+          - id: mypy
+            name: Check types
+            description: This hook runs MyPy with strict settings
+            entry: poetry
+            language: system
+            types: [python]
+            args:
+                - run
+                - mypy
+                - --strict
+                - .
+            pass_filenames: false
           - id: pytest
             name: Check passing tests & TypeGuard usage
             description: This hook runs PyTest with TypeGuard & coverage enabled
