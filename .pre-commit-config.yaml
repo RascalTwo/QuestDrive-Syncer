@@ -62,6 +62,7 @@ repos:
                 - pytest
                 - --cov=questdrive_syncer
                 - --typeguard-packages=questdrive_syncer
+                - -vv
             pass_filenames: false
           - id: coverage
             name: Check coverage
