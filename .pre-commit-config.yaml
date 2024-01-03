@@ -60,6 +60,7 @@ repos:
             args:
                 - run
                 - pytest
+                - --disable-network
                 - --cov=questdrive_syncer
                 - --typeguard-packages=questdrive_syncer
                 - -vv
