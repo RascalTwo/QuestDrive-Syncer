@@ -62,8 +62,12 @@ def test_calls_fetch_video_list_html_and_parse_video_list_html(
     return_value=[video],
 )
 @patch("questdrive_syncer.app.fetch_video_list_html", return_value=("url", "html"))
+@patch("questdrive_syncer.app.update_actively_recording")
 def test_proper_grammer_with_one_video(
-    mock_fetch_video_list_html: Mock, mock_parse_video_list_html: Mock, mock_print: Mock
+    mock_update_actively_recording: Mock,
+    mock_fetch_video_list_html: Mock,
+    mock_parse_video_list_html: Mock,
+    mock_print: Mock,
 ) -> None:
     main()
     mock_print.assert_any_call("Found 1 video:")
@@ -72,11 +76,32 @@ def test_proper_grammer_with_one_video(
 @patch("builtins.print")
 @patch(
     "questdrive_syncer.app.parse_video_list_html",
+    return_value=[video],
+)
+@patch("questdrive_syncer.app.fetch_video_list_html", return_value=("url", "html"))
+@patch("questdrive_syncer.app.update_actively_recording")
+def test_calls_update_actively_recording(
+    mock_update_actively_recording: Mock,
+    mock_fetch_video_list_html: Mock,
+    mock_parse_video_list_html: Mock,
+    mock_print: Mock,
+) -> None:
+    main()
+    mock_update_actively_recording.assert_called()
+
+
+@patch("builtins.print")
+@patch(
+    "questdrive_syncer.app.parse_video_list_html",
     return_value=[video, second_video],
 )
 @patch("questdrive_syncer.app.fetch_video_list_html", return_value=("url", "html"))
+@patch("questdrive_syncer.app.update_actively_recording")
 def test_prints_each_video(
-    mock_fetch_video_list_html: Mock, mock_parse_video_list_html: Mock, mock_print: Mock
+    mock_update_actively_recording: Mock,
+    mock_fetch_video_list_html: Mock,
+    mock_parse_video_list_html: Mock,
+    mock_print: Mock,
 ) -> None:
     main()
     mock_print.assert_any_call(video)

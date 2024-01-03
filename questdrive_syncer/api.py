@@ -26,6 +26,7 @@ class Video:
     modified_at: datetime
     mb_size: float
     listing_url: str
+    actively_recording: bool = False
 
 
 def parse_video_list_html(from_url: str, html: str) -> list[Video]:
@@ -58,3 +59,28 @@ def parse_video_list_html(from_url: str, html: str) -> list[Video]:
             )
         )
     return videos
+
+
+# custom error called MissingVideo
+class MissingVideo(Exception):
+    pass
+
+
+def update_actively_recording(videos: list[Video]) -> None:
+    latest_videos = parse_video_list_html(*fetch_video_list_html())
+
+    for video in videos:
+        latest_video = next(
+            (
+                latest_video
+                for latest_video in latest_videos
+                if latest_video.filepath == video.filepath
+            ),
+            None,
+        )
+
+        if latest_video is None:
+            raise MissingVideo(f'Video "{video.filepath}" no longer found in list')
+
+        if latest_video.modified_at != video.modified_at:
+            video.actively_recording = True

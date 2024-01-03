@@ -2,12 +2,15 @@ from questdrive_syncer.api import (
     is_online,
     fetch_video_list_html,
     parse_video_list_html,
+    update_actively_recording,
     Video,
+    MissingVideo,
 )
 import httpx
 from pytest_httpx import HTTPXMock
 import pytest
 from datetime import datetime
+from unittest.mock import patch, Mock
 
 
 @pytest.fixture
@@ -135,4 +138,86 @@ def test_parse_video_list_html(
             html,
         )
         == expected
+    )
+
+
+@patch(
+    "questdrive_syncer.api.parse_video_list_html",
+    return_value=[
+        Video(
+            "full%2Fpathtofile.mp4",
+            "filename-20240101-111213.mp4",
+            datetime(2024, 1, 1, 11, 12, 13),
+            datetime(2024, 1, 1, 12, 13, 14),
+            2345,
+            "from_url",
+        )
+    ],
+)
+@patch("questdrive_syncer.api.fetch_video_list_html", return_value=("url", "html"))
+def test_update_actively_recording_handles_unchanged(
+    mock_fetch_video_list_html: Mock, mock_parse_video_list_html: Mock
+) -> None:
+    video = Video(
+        "full%2Fpathtofile.mp4",
+        "filename-20240101-111213.mp4",
+        datetime(2024, 1, 1, 11, 12, 13),
+        datetime(2024, 1, 1, 12, 13, 14),
+        2345,
+        "from_url",
+    )
+    update_actively_recording([video])
+    assert video.actively_recording is False
+
+
+@patch(
+    "questdrive_syncer.api.parse_video_list_html",
+    return_value=[
+        Video(
+            "full%2Fpathtofile.mp4",
+            "filename-20240101-111213.mp4",
+            datetime(2024, 1, 1, 11, 12, 13),
+            datetime(2024, 1, 1, 12, 13, 15),
+            2345,
+            "from_url",
+        )
+    ],
+)
+@patch("questdrive_syncer.api.fetch_video_list_html", return_value=("url", "html"))
+def test_update_actively_recording_updates(
+    mock_fetch_video_list_html: Mock, mock_parse_video_list_html: Mock
+) -> None:
+    video = Video(
+        "full%2Fpathtofile.mp4",
+        "filename-20240101-111213.mp4",
+        datetime(2024, 1, 1, 11, 12, 13),
+        datetime(2024, 1, 1, 12, 13, 14),
+        2345,
+        "from_url",
+    )
+    update_actively_recording([video])
+    assert video.actively_recording is True
+
+
+@patch(
+    "questdrive_syncer.api.parse_video_list_html",
+    return_value=[],
+)
+@patch("questdrive_syncer.api.fetch_video_list_html", return_value=("url", "html"))
+def test_throws_if_video_missing(
+    mock_fetch_video_list_html: Mock, mock_parse_video_list_html: Mock
+) -> None:
+    video = Video(
+        "full%2Fpathtofile.mp4",
+        "filename-20240101-111213.mp4",
+        datetime(2024, 1, 1, 11, 12, 13),
+        datetime(2024, 1, 1, 12, 13, 14),
+        2345,
+        "from_url",
+    )
+    with pytest.raises(MissingVideo) as exc_info:
+        update_actively_recording([video])
+    assert (
+        exc_info.value.args[0]
+        == 'Video "full%2Fpathtofile.mp4" no longer found in list'
     )
