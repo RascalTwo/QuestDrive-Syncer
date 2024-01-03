@@ -35,7 +35,10 @@ repos:
       rev: v0.1.9
       hooks:
           - id: ruff
-            args: [--fix]
+            args:
+                - --select
+                - I
+                - --fix
           - id: ruff-format
     - repo: local
       hooks:

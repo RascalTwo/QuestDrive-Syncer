@@ -1,8 +1,10 @@
-import pytest
-from typing import Tuple
 from types import SimpleNamespace
-from .version_bumped import is_version_bumped, check, get_old_and_new_versions
-from unittest.mock import patch, Mock
+from typing import Tuple
+from unittest.mock import Mock, patch
+
+import pytest
+
+from .version_bumped import check, get_old_and_new_versions, is_version_bumped
 
 
 @pytest.mark.parametrize(

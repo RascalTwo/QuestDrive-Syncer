@@ -1,9 +1,11 @@
-import pytest
-from unittest.mock import patch, Mock
-from questdrive_syncer.app import main
-from questdrive_syncer.api import Video
-from datetime import datetime
 import dataclasses
+from datetime import datetime
+from unittest.mock import Mock, patch
+
+import pytest
+
+from questdrive_syncer.api import Video
+from questdrive_syncer.app import main
 
 
 @patch("questdrive_syncer.app.is_online", return_value=False)

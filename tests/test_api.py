@@ -1,17 +1,19 @@
+from datetime import datetime
+from unittest.mock import Mock, mock_open, patch
+
+import httpx
+import pytest
+from pytest_httpx import HTTPXMock
+
 from questdrive_syncer.api import (
-    is_online,
+    MissingVideo,
+    Video,
+    download_and_delete_video,
     fetch_video_list_html,
+    is_online,
     parse_video_list_html,
     update_actively_recording,
-    Video,
-    MissingVideo,
-    download_and_delete_video,
 )
-import httpx
-from pytest_httpx import HTTPXMock
-import pytest
-from datetime import datetime
-from unittest.mock import patch, Mock, mock_open
 
 
 @pytest.fixture
