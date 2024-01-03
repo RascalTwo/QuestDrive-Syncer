@@ -1,0 +1,2 @@
+[run]
+omit = questdrive_syncer/__main__.py

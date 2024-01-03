@@ -1,3 +1,3 @@
-from questdrive_syncer.example import example
+from questdrive_syncer.app import main
 
-print(example(1, 9))
+main()
