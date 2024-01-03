@@ -28,6 +28,12 @@ class Video:
     listing_url: str
     actively_recording: bool = False
 
+    def __str__(self) -> str:
+        string = f"{self.filename} at {self.mb_size} MB - {self.created_at} -> {self.modified_at}"
+        if self.actively_recording:
+            string += " (actively recording)"
+        return string
+
 
 def parse_video_list_html(from_url: str, html: str) -> list[Video]:
     table_html = html.split("<tbody>")[1].split("</tbody>")[0]
