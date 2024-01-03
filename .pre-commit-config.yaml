@@ -62,7 +62,9 @@ repos:
                 - pytest
                 - --disable-network
                 - --cov=questdrive_syncer
+                - --cov=hooks
                 - --typeguard-packages=questdrive_syncer
+                - --typeguard-packages=hooks
                 - -vv
             pass_filenames: false
           - id: coverage
@@ -74,4 +76,15 @@ repos:
                 - report
                 - --fail-under=100
             types: [python]
+            pass_filenames: false
+          - id: version-bumped
+            name: Version Bumped
+            description: Ensure version has been bumped
+            entry: poetry
+            language: system
+            types: [python]
+            args:
+                - run
+                - python
+                - hooks/version_bumped.py
             pass_filenames: false
