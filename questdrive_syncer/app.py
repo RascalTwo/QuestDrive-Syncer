@@ -3,6 +3,7 @@ from questdrive_syncer.api import (
     fetch_video_list_html,
     parse_video_list_html,
     update_actively_recording,
+    download_and_delete_video,
 )
 from questdrive_syncer.constants import QUEST_DRIVE_URL
 import time
@@ -22,5 +23,8 @@ def main() -> None:
 
     update_actively_recording(videos)
 
+    videos = sorted(videos, key=lambda video: video.mb_size)
+
     for video in videos:
         print(video)
+        download_and_delete_video(video)

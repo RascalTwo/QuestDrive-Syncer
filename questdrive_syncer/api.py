@@ -1,5 +1,6 @@
 import httpx
-from questdrive_syncer.constants import QUEST_DRIVE_URL, VIDEO_SHOTS_PATH
+import os
+from questdrive_syncer.constants import QUEST_DRIVE_URL, VIDEO_SHOTS_PATH, OUTPUT_PATH
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -90,3 +91,49 @@ def update_actively_recording(videos: list[Video]) -> None:
 
         if latest_video.modified_at != video.modified_at:
             video.actively_recording = True
+
+
+def download_and_delete_video(video: Video) -> None:
+    if not os.path.exists(OUTPUT_PATH):
+        os.mkdir(OUTPUT_PATH)
+
+    url = QUEST_DRIVE_URL + "download/" + video.filepath
+    response = httpx.get(url)
+    with open(f"{OUTPUT_PATH}/{video.filename}", "wb") as f:
+        f.write(response.content)
+    os.utime(
+        f"{OUTPUT_PATH}/{video.filename}",
+        (video.created_at.timestamp(), video.modified_at.timestamp()),
+    )
+
+    if video.actively_recording:
+        return print(f'"{video.filename}" is actively recording, not deleting')
+
+    content_length_diff = len(response.content) - int(
+        response.headers.get("Content-Length", len(response.content))
+    )
+    if content_length_diff:
+        if content_length_diff > 0:
+            print(
+                f'Received {content_length_diff} bytes more than expected during the download of "{video.filename}"'
+            )
+        else:
+            print(
+                f'Received {-content_length_diff} bytes less than expected during the download of "{video.filename}"'
+            )
+        return
+
+    written_length = os.path.getsize(f"{OUTPUT_PATH}/{video.filename}")
+    written_length_diff = len(response.content) - written_length
+    if written_length_diff:
+        if written_length_diff > 0:
+            print(
+                f'Wrote {written_length_diff} bytes more than received during the download of "{video.filename}"'
+            )
+        else:
+            print(
+                f'Wrote {-written_length_diff} bytes less than received during the download of "{video.filename}"'
+            )
+        return
+
+    httpx.get(QUEST_DRIVE_URL + "delete/" + video.filepath)

@@ -75,7 +75,9 @@ def test_calls_fetch_video_list_html_and_parse_video_list_html(
 @patch("questdrive_syncer.app.fetch_video_list_html", return_value=("url", "html"))
 @patch("questdrive_syncer.app.update_actively_recording")
 @patch("questdrive_syncer.app.is_online", return_value=True)
+@patch("questdrive_syncer.app.download_and_delete_video")
 def test_proper_grammer_with_one_video(
+    mock_download_and_delete_video: Mock,
     mock_is_online: Mock,
     mock_update_actively_recording: Mock,
     mock_fetch_video_list_html: Mock,
@@ -94,7 +96,9 @@ def test_proper_grammer_with_one_video(
 @patch("questdrive_syncer.app.fetch_video_list_html", return_value=("url", "html"))
 @patch("questdrive_syncer.app.update_actively_recording")
 @patch("questdrive_syncer.app.is_online", return_value=True)
+@patch("questdrive_syncer.app.download_and_delete_video")
 def test_calls_update_actively_recording(
+    mock_download_and_delete_video: Mock,
     mock_is_online: Mock,
     mock_update_actively_recording: Mock,
     mock_fetch_video_list_html: Mock,
@@ -113,7 +117,9 @@ def test_calls_update_actively_recording(
 @patch("questdrive_syncer.app.fetch_video_list_html", return_value=("url", "html"))
 @patch("questdrive_syncer.app.update_actively_recording")
 @patch("questdrive_syncer.app.is_online", return_value=True)
-def test_prints_each_video(
+@patch("questdrive_syncer.app.download_and_delete_video")
+def test_prints_and_downloads_each_video_from_smallest_to_largest(
+    mock_download_and_delete_video: Mock,
     mock_is_online: Mock,
     mock_update_actively_recording: Mock,
     mock_fetch_video_list_html: Mock,
@@ -123,3 +129,5 @@ def test_prints_each_video(
     main()
     mock_print.assert_any_call(video)
     mock_print.assert_called_with(second_video)
+    mock_download_and_delete_video.assert_any_call(video)
+    mock_download_and_delete_video.assert_called_with(second_video)
