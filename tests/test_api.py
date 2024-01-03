@@ -1,4 +1,5 @@
 from datetime import datetime
+from types import SimpleNamespace
 from unittest.mock import Mock, mock_open, patch
 
 import httpx
@@ -10,6 +11,7 @@ from questdrive_syncer.api import (
     Video,
     download_and_delete_video,
     fetch_video_list_html,
+    has_enough_free_space,
     is_online,
     parse_video_list_html,
     update_actively_recording,
@@ -494,3 +496,13 @@ def test_download_and_delete_doesnt_delete_if_wrote_more_then_received(
         )
 
         assert len(httpx_mock.get_requests()) == 1
+
+
+@patch("os.statvfs", return_value=SimpleNamespace(f_frsize=1, f_bavail=1024**3 * 2))
+def test_has_enough_free_space_enough(mock_statvfs: Mock) -> None:
+    assert has_enough_free_space(1024) is True
+
+
+@patch("os.statvfs", return_value=SimpleNamespace(f_frsize=1, f_bavail=1024**3 * 2))
+def test_has_enough_free_space_not_enough(mock_statvfs: Mock) -> None:
+    assert has_enough_free_space(1025) is False

@@ -133,3 +133,29 @@ def test_prints_and_downloads_each_video_from_smallest_to_largest(
     mock_print.assert_called_with(second_video)
     mock_download_and_delete_video.assert_any_call(video)
     mock_download_and_delete_video.assert_called_with(second_video)
+
+
+@patch("builtins.print")
+@patch(
+    "questdrive_syncer.app.parse_video_list_html",
+    return_value=[video],
+)
+@patch("questdrive_syncer.app.fetch_video_list_html", return_value=("url", "html"))
+@patch("questdrive_syncer.app.update_actively_recording")
+@patch("questdrive_syncer.app.is_online", return_value=True)
+@patch("questdrive_syncer.app.download_and_delete_video", return_value=False)
+@patch("questdrive_syncer.app.has_enough_free_space", return_value=False)
+def test_doesnt_download_video_if_not_enough_space(
+    mock_has_enough_free_space: Mock,
+    mock_download_and_delete_video: Mock,
+    mock_is_online: Mock,
+    mock_update_actively_recording: Mock,
+    mock_fetch_video_list_html: Mock,
+    mock_parse_video_list_html: Mock,
+    mock_print: Mock,
+) -> None:
+    main()
+    mock_print.assert_called_with(
+        'Skipping download of "filename" because there is not enough free space'
+    )
+    mock_download_and_delete_video.assert_not_called()

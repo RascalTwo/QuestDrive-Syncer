@@ -3,6 +3,7 @@ import time
 from questdrive_syncer.api import (
     download_and_delete_video,
     fetch_video_list_html,
+    has_enough_free_space,
     is_online,
     parse_video_list_html,
     update_actively_recording,
@@ -28,4 +29,9 @@ def main() -> None:
 
     for video in videos:
         print(video)
-        download_and_delete_video(video)
+        if has_enough_free_space(video.mb_size):
+            download_and_delete_video(video)
+        else:
+            print(
+                f'Skipping download of "{video.filename}" because there is not enough free space'
+            )

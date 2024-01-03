@@ -4,7 +4,12 @@ from datetime import datetime
 
 import httpx
 
-from questdrive_syncer.constants import OUTPUT_PATH, QUEST_DRIVE_URL, VIDEO_SHOTS_PATH
+from questdrive_syncer.constants import (
+    MINIMUM_FREE_SPACE_BYTES,
+    OUTPUT_PATH,
+    QUEST_DRIVE_URL,
+    VIDEO_SHOTS_PATH,
+)
 
 
 def is_online() -> bool:
@@ -139,3 +144,10 @@ def download_and_delete_video(video: Video) -> None:
         return
 
     httpx.get(QUEST_DRIVE_URL + "delete/" + video.filepath)
+
+
+def has_enough_free_space(mb_size: float) -> bool:
+    statvfs = os.statvfs(OUTPUT_PATH)
+    free_space = statvfs.f_frsize * statvfs.f_bavail
+    free_space_after_download = free_space - mb_size * 1024**2
+    return free_space_after_download >= MINIMUM_FREE_SPACE_BYTES
