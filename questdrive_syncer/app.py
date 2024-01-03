@@ -1,14 +1,5 @@
-import httpx
-
-QUEST_DRIVE_URL = "http://192.168.254.75:7123/"
-
-
-def is_online() -> bool:
-    try:
-        response = httpx.get(QUEST_DRIVE_URL)
-        return response.status_code == 200
-    except httpx.ConnectError:
-        return False
+from questdrive_syncer.api import is_online
+from questdrive_syncer.constants import QUEST_DRIVE_URL
 
 
 def main() -> None:
