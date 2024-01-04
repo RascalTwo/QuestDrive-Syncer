@@ -1,3 +1,3 @@
-from questdrive_syncer.app import main
+from questdrive_syncer.main import main
 
 main()

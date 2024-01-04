@@ -1,14 +1,14 @@
 import time
 
-from questdrive_syncer.api import (
+from .api import (
     download_and_delete_video,
     fetch_video_list_html,
-    has_enough_free_space,
     is_online,
-    parse_video_list_html,
     update_actively_recording,
 )
-from questdrive_syncer.constants import QUEST_DRIVE_URL
+from .constants import QUEST_DRIVE_URL
+from .helpers import has_enough_free_space
+from .parsers import parse_video_list_html
 
 
 def main() -> None:

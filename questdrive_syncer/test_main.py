@@ -4,11 +4,11 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from questdrive_syncer.api import Video
-from questdrive_syncer.app import main
+from .main import main
+from .structures import Video
 
 
-@patch("questdrive_syncer.app.is_online", return_value=False)
+@patch("questdrive_syncer.main.is_online", return_value=False)
 @patch("builtins.print")
 def test_message_if_not_online(mock_print: Mock, mock_is_online: Mock) -> None:
     with pytest.raises(SystemExit):
@@ -18,7 +18,7 @@ def test_message_if_not_online(mock_print: Mock, mock_is_online: Mock) -> None:
     )
 
 
-@patch("questdrive_syncer.app.is_online", return_value=False)
+@patch("questdrive_syncer.main.is_online", return_value=False)
 def test_failed_status_code(mock_is_online: Mock) -> None:
     with pytest.raises(SystemExit) as exc_info:
         main()
@@ -32,11 +32,11 @@ second_video.mb_size = 2.34
 
 @patch("builtins.print")
 @patch(
-    "questdrive_syncer.app.fetch_video_list_html",
+    "questdrive_syncer.main.fetch_video_list_html",
     return_value=("url", "<tbody></tbody>"),
 )
-@patch("questdrive_syncer.app.update_actively_recording")
-@patch("questdrive_syncer.app.is_online", return_value=True)
+@patch("questdrive_syncer.main.update_actively_recording")
+@patch("questdrive_syncer.main.is_online", return_value=True)
 def test_print_when_successful(
     mock_is_online: Mock,
     mock_update_actively_recording: Mock,
@@ -51,12 +51,12 @@ def test_print_when_successful(
 
 @patch("builtins.print")
 @patch(
-    "questdrive_syncer.app.parse_video_list_html",
+    "questdrive_syncer.main.parse_video_list_html",
     return_value=[],
 )
-@patch("questdrive_syncer.app.fetch_video_list_html", return_value=("url", "html"))
-@patch("questdrive_syncer.app.update_actively_recording")
-@patch("questdrive_syncer.app.is_online", return_value=True)
+@patch("questdrive_syncer.main.fetch_video_list_html", return_value=("url", "html"))
+@patch("questdrive_syncer.main.update_actively_recording")
+@patch("questdrive_syncer.main.is_online", return_value=True)
 def test_calls_fetch_video_list_html_and_parse_video_list_html(
     mock_is_online: Mock,
     mock_update_actively_recording: Mock,
@@ -71,13 +71,13 @@ def test_calls_fetch_video_list_html_and_parse_video_list_html(
 
 @patch("builtins.print")
 @patch(
-    "questdrive_syncer.app.parse_video_list_html",
+    "questdrive_syncer.main.parse_video_list_html",
     return_value=[video],
 )
-@patch("questdrive_syncer.app.fetch_video_list_html", return_value=("url", "html"))
-@patch("questdrive_syncer.app.update_actively_recording")
-@patch("questdrive_syncer.app.is_online", return_value=True)
-@patch("questdrive_syncer.app.download_and_delete_video")
+@patch("questdrive_syncer.main.fetch_video_list_html", return_value=("url", "html"))
+@patch("questdrive_syncer.main.update_actively_recording")
+@patch("questdrive_syncer.main.is_online", return_value=True)
+@patch("questdrive_syncer.main.download_and_delete_video")
 def test_proper_grammer_with_one_video(
     mock_download_and_delete_video: Mock,
     mock_is_online: Mock,
@@ -92,13 +92,13 @@ def test_proper_grammer_with_one_video(
 
 @patch("builtins.print")
 @patch(
-    "questdrive_syncer.app.parse_video_list_html",
+    "questdrive_syncer.main.parse_video_list_html",
     return_value=[video],
 )
-@patch("questdrive_syncer.app.fetch_video_list_html", return_value=("url", "html"))
-@patch("questdrive_syncer.app.update_actively_recording")
-@patch("questdrive_syncer.app.is_online", return_value=True)
-@patch("questdrive_syncer.app.download_and_delete_video")
+@patch("questdrive_syncer.main.fetch_video_list_html", return_value=("url", "html"))
+@patch("questdrive_syncer.main.update_actively_recording")
+@patch("questdrive_syncer.main.is_online", return_value=True)
+@patch("questdrive_syncer.main.download_and_delete_video")
 def test_calls_update_actively_recording(
     mock_download_and_delete_video: Mock,
     mock_is_online: Mock,
@@ -113,13 +113,13 @@ def test_calls_update_actively_recording(
 
 @patch("builtins.print")
 @patch(
-    "questdrive_syncer.app.parse_video_list_html",
+    "questdrive_syncer.main.parse_video_list_html",
     return_value=[video, second_video],
 )
-@patch("questdrive_syncer.app.fetch_video_list_html", return_value=("url", "html"))
-@patch("questdrive_syncer.app.update_actively_recording")
-@patch("questdrive_syncer.app.is_online", return_value=True)
-@patch("questdrive_syncer.app.download_and_delete_video")
+@patch("questdrive_syncer.main.fetch_video_list_html", return_value=("url", "html"))
+@patch("questdrive_syncer.main.update_actively_recording")
+@patch("questdrive_syncer.main.is_online", return_value=True)
+@patch("questdrive_syncer.main.download_and_delete_video")
 def test_prints_and_downloads_each_video_from_smallest_to_largest(
     mock_download_and_delete_video: Mock,
     mock_is_online: Mock,
@@ -137,14 +137,14 @@ def test_prints_and_downloads_each_video_from_smallest_to_largest(
 
 @patch("builtins.print")
 @patch(
-    "questdrive_syncer.app.parse_video_list_html",
+    "questdrive_syncer.main.parse_video_list_html",
     return_value=[video],
 )
-@patch("questdrive_syncer.app.fetch_video_list_html", return_value=("url", "html"))
-@patch("questdrive_syncer.app.update_actively_recording")
-@patch("questdrive_syncer.app.is_online", return_value=True)
-@patch("questdrive_syncer.app.download_and_delete_video", return_value=False)
-@patch("questdrive_syncer.app.has_enough_free_space", return_value=False)
+@patch("questdrive_syncer.main.fetch_video_list_html", return_value=("url", "html"))
+@patch("questdrive_syncer.main.update_actively_recording")
+@patch("questdrive_syncer.main.is_online", return_value=True)
+@patch("questdrive_syncer.main.download_and_delete_video", return_value=False)
+@patch("questdrive_syncer.main.has_enough_free_space", return_value=False)
 def test_doesnt_download_video_if_not_enough_space(
     mock_has_enough_free_space: Mock,
     mock_download_and_delete_video: Mock,
