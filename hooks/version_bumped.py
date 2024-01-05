@@ -1,13 +1,17 @@
+"""Ensure the version in pyproject.toml has been increased."""
+from __future__ import annotations
+
 import subprocess
-from typing import Optional, Tuple
+import sys
 
 
-def get_old_and_new_versions() -> Optional[Tuple[list[int], list[int]]]:
+def get_old_and_new_versions() -> None | tuple[list[int], list[int]]:
+    """Return the staged old and new versions."""
     stdout = subprocess.run(
-        ["git", "diff", "--staged", "pyproject.toml"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        ["git", "diff", "--staged", "pyproject.toml"],  # noqa: S603,S607
+        capture_output=True,
         text=True,
+        check=False,
     ).stdout
 
     if "-version" not in stdout or "+version" not in stdout:
@@ -21,24 +25,26 @@ def get_old_and_new_versions() -> Optional[Tuple[list[int], list[int]]]:
 
 
 def is_version_bumped(old_version: list[int], new_version: list[int]) -> bool:
+    """Return if the version has been bumped."""
     for old, new in zip(old_version, new_version):
         if new > old:
             return True
-        elif new < old:
+        if new < old:
             return False
     return False
 
 
 def check() -> None:
+    """Check that the version is bumped."""
     versions = get_old_and_new_versions()
     if versions is None or not is_version_bumped(*versions):
         print("You must bump the version in pyproject.toml before committing.")
-        exit(1)
+        sys.exit(1)
 
     print(
         "Version bumped from {} to {}.".format(
-            *(".".join(map(str, version)) for version in versions)
-        )
+            *(".".join(map(str, version)) for version in versions),
+        ),
     )
 
 

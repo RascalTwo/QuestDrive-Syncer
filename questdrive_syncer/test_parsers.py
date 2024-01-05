@@ -1,3 +1,6 @@
+"""Test the parsers module."""
+from __future__ import annotations
+
 from datetime import datetime
 
 import pytest
@@ -49,17 +52,17 @@ html_expected_mappings = {
 
 
 @pytest.mark.parametrize(
-    "html, expected",
+    ("html", "expected"),
     [
-        [
+        (
             """
             <tbody>
                 <tr></tr>
             </tbody>
         """,
             [],
-        ],
-        [
+        ),
+        (
             f"""
             <tbody>
                 <tr></tr>
@@ -67,8 +70,8 @@ html_expected_mappings = {
             </tbody>
         """,
             [html_expected_mappings["normal"][1]],
-        ],
-        [
+        ),
+        (
             f"""
             <tbody>
                 <tr></tr>
@@ -80,8 +83,8 @@ html_expected_mappings = {
                 html_expected_mappings["normal"][1],
                 html_expected_mappings["normal"][1],
             ],
-        ],
-        [
+        ),
+        (
             f"""
             <tbody>
                 <tr></tr>
@@ -89,13 +92,14 @@ html_expected_mappings = {
             </tbody>
         """,
             [html_expected_mappings["gb"][1]],
-        ],
+        ),
     ],
 )
 def test_parse_video_list_html(
     html: str,
     expected: list[Video],
 ) -> None:
+    """parse_video_list_html function returns the expected list of Video objects."""
     assert (
         parse_video_list_html(
             "from_url",

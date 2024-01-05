@@ -37,7 +37,9 @@ repos:
           - id: ruff
             args:
                 - --select
-                - I
+                - ALL
+                - --ignore
+                - DTZ001,DTZ005,DTZ007,S101,E501,T201,D213,D203,ARG001,PLR0913
                 - --fix
           - id: ruff-format
     - repo: local

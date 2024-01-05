@@ -1,9 +1,13 @@
+"""Parsers for QuestDrive's HTML pages."""
+from __future__ import annotations
+
 from datetime import datetime
 
 from .structures import Video
 
 
 def parse_video_list_html(from_url: str, html: str) -> list[Video]:
+    """Parse the video list HTML into a list of videos."""
     table_html = html.split("<tbody>")[1].split("</tbody>")[0]
 
     videos: list[Video] = []
@@ -14,7 +18,8 @@ def parse_video_list_html(from_url: str, html: str) -> list[Video]:
         ]
         filename = raw_cells[0].split("</a>")[1].replace("&nbsp;", "").strip()
         created_at = datetime.strptime(
-            "-".join(filename.split("-")[-2:]).split(".")[0], "%Y%m%d-%H%M%S"
+            "-".join(filename.split("-")[-2:]).split(".")[0],
+            "%Y%m%d-%H%M%S",
         )
         modified_at = datetime.strptime(raw_cells[1], "%m/%d/%Y %H:%M:%S")
         filepath = raw_cells[3].split("href='/download/")[1].split("'")[0]
@@ -30,6 +35,6 @@ def parse_video_list_html(from_url: str, html: str) -> list[Video]:
                 modified_at=modified_at,
                 mb_size=mb_size,
                 listing_url=from_url,
-            )
+            ),
         )
     return videos

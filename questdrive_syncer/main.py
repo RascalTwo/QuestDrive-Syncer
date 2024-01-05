@@ -1,3 +1,5 @@
+"""Main function."""
+import sys
 import time
 
 from .api import (
@@ -6,24 +8,23 @@ from .api import (
     is_online,
     update_actively_recording,
 )
-from .constants import QUEST_DRIVE_URL
+from .constants import FAILURE_EXIT_CODE, QUEST_DRIVE_URL
 from .helpers import has_enough_free_space
 from .parsers import parse_video_list_html
 
 
 def main() -> None:
+    """Perform all actions."""
     if not is_online():
         print(f'QuestDrive not found at "{QUEST_DRIVE_URL}"')
-        exit(3)
+        sys.exit(FAILURE_EXIT_CODE)
     print(f"QuestDrive found running at {QUEST_DRIVE_URL}")
 
-    url, html = fetch_video_list_html()
+    videos = parse_video_list_html(*fetch_video_list_html())
     time.sleep(1)
-
-    videos = parse_video_list_html(url, html)
     print(f"Found {len(videos)} video{'' if len(videos) == 1 else 's'}:")
 
-    update_actively_recording(videos)
+    update_actively_recording(videos, parse_video_list_html(*fetch_video_list_html()))
 
     videos = sorted(videos, key=lambda video: video.mb_size)
 
@@ -33,5 +34,5 @@ def main() -> None:
             download_and_delete_video(video)
         else:
             print(
-                f'Skipping download of "{video.filename}" because there is not enough free space'
+                f'Skipping download of "{video.filename}" because there is not enough free space',
             )

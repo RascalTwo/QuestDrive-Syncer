@@ -1,9 +1,12 @@
+"""Common structures."""
 from dataclasses import dataclass
 from datetime import datetime
 
 
 @dataclass
 class Video:
+    """Video representation."""
+
     filepath: str
     filename: str
     created_at: datetime
@@ -12,12 +15,17 @@ class Video:
     listing_url: str
     actively_recording: bool = False
 
-    def __str__(self) -> str:
+    def __str__(self: "Video") -> str:
+        """Return a string representation of the video."""
         string = f"{self.filename} at {self.mb_size} MB - {self.created_at} -> {self.modified_at}"
         if self.actively_recording:
             string += " (actively recording)"
         return string
 
 
-class MissingVideo(Exception):
-    pass
+class MissingVideoError(Exception):
+    """Raised when a video is missing."""
+
+    def __init__(self: "MissingVideoError", video_filepath: str) -> None:
+        """Initialize the exception."""
+        super().__init__(f'Video "{video_filepath}" is missing.')
