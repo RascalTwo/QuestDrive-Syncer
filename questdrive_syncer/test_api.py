@@ -1,11 +1,14 @@
 """Tests for the API module."""
 from datetime import datetime
+from operator import itemgetter
 from types import SimpleNamespace
-from unittest.mock import mock_open, patch
+from typing import Any
+from unittest.mock import mock_open
 
 import httpx
 import pytest
 from pytest_httpx import HTTPXMock
+from pytest_mock import MockerFixture
 
 from .api import (
     download_and_delete_video,
@@ -107,289 +110,263 @@ def test_update_actively_recording_throws_if_video_missing() -> None:
     assert exc_info.value.args[0] == 'Video "full%2Fpathtofile.mp4" is missing.'
 
 
+def make_download_and_delete_video_mocks(
+    mocker: MockerFixture,
+    *desired: str,
+    st_size: int = 0,
+) -> Any:  # noqa: ANN401
+    """Create mocks for download_and_delete_video()."""
+    mock_mkdir = mocker.patch("pathlib.Path.mkdir")
+    mocked_open = mocker.patch("pathlib.Path.open", mock_open())
+    mocker.patch(
+        "pathlib.Path.stat",
+        return_value=SimpleNamespace(st_mode=33204, st_size=st_size),
+    )
+    mock_utime = mocker.patch("os.utime")
+    mock_print = mocker.patch("builtins.print")
+    if not desired:
+        return None
+
+    return itemgetter(*desired)(
+        {
+            "mock_mkdir": mock_mkdir,
+            "mocked_open": mocked_open,
+            "mock_utime": mock_utime,
+            "mock_print": mock_print,
+        },
+    )
+
+
 def test_download_and_delete_creates_output_directory(
     httpx_mock: HTTPXMock,
+    mocker: MockerFixture,
 ) -> None:
     """download_and_delete_video() creates the output directory."""
-    with patch("os.utime"), patch(
-        "pathlib.Path.stat",
-        return_value=SimpleNamespace(st_mode=33204, st_size=0),
-    ), patch(
-        "pathlib.Path.mkdir",
-    ) as mock_mkdir, patch(
-        "builtins.open",
-        mock_open(),
-    ):
-        httpx_mock.add_response()
-        download_and_delete_video(
-            Video(
-                "full%2Fpathtofile.mp4",
-                "filename-20240101-111213.mp4",
-                datetime(2024, 1, 1, 11, 12, 13),
-                datetime(2024, 1, 1, 12, 13, 14),
-                2345,
-                "from_url",
-            ),
-        )
-        mock_mkdir.assert_called_once_with(parents=True, exist_ok=True)
+    mock_mkdir = make_download_and_delete_video_mocks(mocker, "mock_mkdir")
+    httpx_mock.add_response()
+
+    download_and_delete_video(
+        Video(
+            "full%2Fpathtofile.mp4",
+            "filename-20240101-111213.mp4",
+            datetime(2024, 1, 1, 11, 12, 13),
+            datetime(2024, 1, 1, 12, 13, 14),
+            2345,
+            "from_url",
+        ),
+    )
+
+    mock_mkdir.assert_called_once_with(parents=True, exist_ok=True)
 
 
 def test_download_and_delete_requests_correct_url(
     httpx_mock: HTTPXMock,
+    mocker: MockerFixture,
 ) -> None:
     """download_and_delete_video() calls the correct URL."""
-    with patch("os.utime"), patch(
-        "pathlib.Path.stat",
-        return_value=SimpleNamespace(st_mode=33204, st_size=0),
-    ), patch(
-        "pathlib.Path.mkdir",
-    ), patch(
-        "pathlib.Path.open",
-        mock_open(),
-    ):
-        httpx_mock.add_response()
-        download_and_delete_video(
-            Video(
-                "full%2Fpathtofile.mp4",
-                "filename-20240101-111213.mp4",
-                datetime(2024, 1, 1, 11, 12, 13),
-                datetime(2024, 1, 1, 12, 13, 14),
-                2345,
-                "from_url",
-            ),
-        )
+    make_download_and_delete_video_mocks(mocker)
+    httpx_mock.add_response()
 
-        request = httpx_mock.get_requests()[0]
-        assert request
-        assert (
-            str(request.url)
-            == "http://192.168.254.75:7123/download/full%2Fpathtofile.mp4"
-        )
+    download_and_delete_video(
+        Video(
+            "full%2Fpathtofile.mp4",
+            "filename-20240101-111213.mp4",
+            datetime(2024, 1, 1, 11, 12, 13),
+            datetime(2024, 1, 1, 12, 13, 14),
+            2345,
+            "from_url",
+        ),
+    )
+
+    request = httpx_mock.get_requests()[0]
+    assert request
+    assert (
+        str(request.url) == "http://192.168.254.75:7123/download/full%2Fpathtofile.mp4"
+    )
 
 
 def test_download_and_delete_writes_to_correct_path(
     httpx_mock: HTTPXMock,
+    mocker: MockerFixture,
 ) -> None:
     """download_and_delete_video() writes to the correct path."""
-    with patch("os.utime") as mock_utime, patch(
-        "pathlib.Path.open",
-        mock_open(),
-    ) as mocked_open, patch(
-        "pathlib.Path.mkdir",
-    ), patch(
-        "pathlib.Path.stat",
-        return_value=SimpleNamespace(st_mode=33204, st_size=0),
-    ):
-        one_mb = b"0" * 1000000
-        httpx_mock.add_response(content=one_mb)
-        download_and_delete_video(
-            Video(
-                "full%2Fpathtofile.mp4",
-                "filename-20240101-111213.mp4",
-                datetime(2024, 1, 1, 11, 12, 13),
-                datetime(2024, 1, 1, 12, 13, 14),
-                2345,
-                "from_url",
-            ),
-        )
+    one_mb = b"0" * 1000000
+    mocked_open, mock_utime = make_download_and_delete_video_mocks(
+        mocker,
+        "mocked_open",
+        "mock_utime",
+    )
+    httpx_mock.add_response(content=one_mb)
 
-        mocked_open.assert_called_once_with("wb")
-        file = mocked_open()
-        file.write.assert_called_once_with(one_mb)
-        mock_utime.assert_called_once_with(
-            "output/filename-20240101-111213.mp4",
-            (
-                datetime(2024, 1, 1, 11, 12, 13).timestamp(),
-                datetime(2024, 1, 1, 12, 13, 14).timestamp(),
-            ),
-        )
+    download_and_delete_video(
+        Video(
+            "full%2Fpathtofile.mp4",
+            "filename-20240101-111213.mp4",
+            datetime(2024, 1, 1, 11, 12, 13),
+            datetime(2024, 1, 1, 12, 13, 14),
+            2345,
+            "from_url",
+        ),
+    )
+
+    mocked_open.assert_called_once_with("wb")
+    file = mocked_open()
+    file.write.assert_called_once_with(one_mb)
+    mock_utime.assert_called_once_with(
+        "output/filename-20240101-111213.mp4",
+        (
+            datetime(2024, 1, 1, 11, 12, 13).timestamp(),
+            datetime(2024, 1, 1, 12, 13, 14).timestamp(),
+        ),
+    )
 
 
 def test_download_and_delete_calls_delete_url(
     httpx_mock: HTTPXMock,
+    mocker: MockerFixture,
 ) -> None:
     """download_and_delete_video() calls the correct URL when deleting."""
-    with patch("os.utime"), patch(
-        "pathlib.Path.stat",
-        return_value=SimpleNamespace(st_mode=33204, st_size=0),
-    ), patch(
-        "pathlib.Path.mkdir",
-    ), patch(
-        "pathlib.Path.open",
-        mock_open(),
-    ):
-        httpx_mock.add_response()
-        httpx_mock.add_response()
-        download_and_delete_video(
-            Video(
-                "full%2Fpathtofile.mp4",
-                "filename-20240101-111213.mp4",
-                datetime(2024, 1, 1, 11, 12, 13),
-                datetime(2024, 1, 1, 12, 13, 14),
-                2345,
-                "from_url",
-            ),
-        )
+    make_download_and_delete_video_mocks(mocker)
+    httpx_mock.add_response()
+    httpx_mock.add_response()
 
-        request = httpx_mock.get_requests()[1]
-        assert request
-        assert (
-            str(request.url)
-            == "http://192.168.254.75:7123/delete/full%2Fpathtofile.mp4"
-        )
+    download_and_delete_video(
+        Video(
+            "full%2Fpathtofile.mp4",
+            "filename-20240101-111213.mp4",
+            datetime(2024, 1, 1, 11, 12, 13),
+            datetime(2024, 1, 1, 12, 13, 14),
+            2345,
+            "from_url",
+        ),
+    )
+
+    request = httpx_mock.get_requests()[1]
+    assert request
+    assert str(request.url) == "http://192.168.254.75:7123/delete/full%2Fpathtofile.mp4"
 
 
 def test_download_and_delete_doesnt_delete_actively_recording(
     httpx_mock: HTTPXMock,
+    mocker: MockerFixture,
 ) -> None:
     """download_and_delete_video() doesn't delete a video if it's actively recording."""
-    with patch("os.utime"), patch(
-        "pathlib.Path.stat",
-        return_value=SimpleNamespace(st_mode=33204, st_size=0),
-    ), patch(
-        "pathlib.Path.mkdir",
-    ), patch(
-        "builtins.open",
-        mock_open(),
-    ), patch("builtins.print") as mock_print:
-        httpx_mock.add_response()
-        download_and_delete_video(
-            Video(
-                "full%2Fpathtofile.mp4",
-                "filename-20240101-111213.mp4",
-                datetime(2024, 1, 1, 11, 12, 13),
-                datetime(2024, 1, 1, 12, 13, 14),
-                2345,
-                "from_url",
-                actively_recording=True,
-            ),
-        )
-        mock_print.assert_called_once_with(
-            '"filename-20240101-111213.mp4" is actively recording, not deleting',
-        )
+    mock_print = make_download_and_delete_video_mocks(mocker, "mock_print")
+    httpx_mock.add_response()
 
-        assert len(httpx_mock.get_requests()) == 1
+    download_and_delete_video(
+        Video(
+            "full%2Fpathtofile.mp4",
+            "filename-20240101-111213.mp4",
+            datetime(2024, 1, 1, 11, 12, 13),
+            datetime(2024, 1, 1, 12, 13, 14),
+            2345,
+            "from_url",
+            actively_recording=True,
+        ),
+    )
+
+    mock_print.assert_called_once_with(
+        '"filename-20240101-111213.mp4" is actively recording, not deleting',
+    )
+    assert len(httpx_mock.get_requests()) == 1
 
 
 def test_download_and_delete_doesnt_delete_if_expecting_more_content(
     httpx_mock: HTTPXMock,
+    mocker: MockerFixture,
 ) -> None:
     """download_and_delete_video() doesn't delete a video if it's expecting more content."""
-    with patch("os.utime"), patch(
-        "pathlib.Path.stat",
-        return_value=SimpleNamespace(st_mode=33204, st_size=0),
-    ), patch(
-        "pathlib.Path.mkdir",
-    ), patch(
-        "builtins.open",
-        mock_open(),
-    ), patch("builtins.print") as mock_print:
-        httpx_mock.add_response(headers={"Content-Length": "5"}, content=b"123")
-        download_and_delete_video(
-            Video(
-                "full%2Fpathtofile.mp4",
-                "filename-20240101-111213.mp4",
-                datetime(2024, 1, 1, 11, 12, 13),
-                datetime(2024, 1, 1, 12, 13, 14),
-                2345,
-                "from_url",
-            ),
-        )
-        mock_print.assert_called_once_with(
-            'Received 2 bytes less than expected during the download of "filename-20240101-111213.mp4"',
-        )
+    mock_print = make_download_and_delete_video_mocks(mocker, "mock_print")
+    httpx_mock.add_response(headers={"Content-Length": "5"}, content=b"123")
 
-        assert len(httpx_mock.get_requests()) == 1
+    download_and_delete_video(
+        Video(
+            "full%2Fpathtofile.mp4",
+            "filename-20240101-111213.mp4",
+            datetime(2024, 1, 1, 11, 12, 13),
+            datetime(2024, 1, 1, 12, 13, 14),
+            2345,
+            "from_url",
+        ),
+    )
+
+    mock_print.assert_called_once_with(
+        'Received 2 bytes less than expected during the download of "filename-20240101-111213.mp4"',
+    )
+    assert len(httpx_mock.get_requests()) == 1
 
 
 def test_download_and_delete_doesnt_delete_if_received_more_content_then_expected(
     httpx_mock: HTTPXMock,
+    mocker: MockerFixture,
 ) -> None:
     """download_and_delete_video() doesn't delete a video if it received more content than expected."""
-    with patch("os.utime"), patch(
-        "pathlib.Path.stat",
-        return_value=SimpleNamespace(st_mode=33204, st_size=0),
-    ), patch(
-        "pathlib.Path.mkdir",
-    ), patch(
-        "builtins.open",
-        mock_open(),
-    ), patch("builtins.print") as mock_print:
-        httpx_mock.add_response(headers={"Content-Length": "3"}, content=b"12345")
-        download_and_delete_video(
-            Video(
-                "full%2Fpathtofile.mp4",
-                "filename-20240101-111213.mp4",
-                datetime(2024, 1, 1, 11, 12, 13),
-                datetime(2024, 1, 1, 12, 13, 14),
-                2345,
-                "from_url",
-            ),
-        )
-        mock_print.assert_called_once_with(
-            'Received 2 bytes more than expected during the download of "filename-20240101-111213.mp4"',
-        )
+    mock_print = make_download_and_delete_video_mocks(mocker, "mock_print")
+    httpx_mock.add_response(headers={"Content-Length": "3"}, content=b"12345")
 
-        assert len(httpx_mock.get_requests()) == 1
+    download_and_delete_video(
+        Video(
+            "full%2Fpathtofile.mp4",
+            "filename-20240101-111213.mp4",
+            datetime(2024, 1, 1, 11, 12, 13),
+            datetime(2024, 1, 1, 12, 13, 14),
+            2345,
+            "from_url",
+        ),
+    )
+
+    mock_print.assert_called_once_with(
+        'Received 2 bytes more than expected during the download of "filename-20240101-111213.mp4"',
+    )
+    assert len(httpx_mock.get_requests()) == 1
 
 
 def test_download_and_delete_doesnt_delete_if_wrote_less_then_received(
     httpx_mock: HTTPXMock,
+    mocker: MockerFixture,
 ) -> None:
     """download_and_delete_video() doesn't delete a video if it wrote less bytes than it received."""
-    with patch("os.utime"), patch(
-        "pathlib.Path.stat",
-        return_value=SimpleNamespace(st_mode=33204, st_size=7),
-    ), patch(
-        "pathlib.Path.mkdir",
-    ), patch(
-        "builtins.open",
-        mock_open(),
-    ), patch("builtins.print") as mock_print:
-        httpx_mock.add_response(headers={"Content-Length": "5"}, content=b"12345")
-        download_and_delete_video(
-            Video(
-                "full%2Fpathtofile.mp4",
-                "filename-20240101-111213.mp4",
-                datetime(2024, 1, 1, 11, 12, 13),
-                datetime(2024, 1, 1, 12, 13, 14),
-                2345,
-                "from_url",
-            ),
-        )
-        mock_print.assert_called_once_with(
-            'Wrote 2 bytes less than received during the download of "filename-20240101-111213.mp4"',
-        )
+    mock_print = make_download_and_delete_video_mocks(mocker, "mock_print", st_size=7)
+    httpx_mock.add_response(headers={"Content-Length": "5"}, content=b"12345")
 
-        assert len(httpx_mock.get_requests()) == 1
+    download_and_delete_video(
+        Video(
+            "full%2Fpathtofile.mp4",
+            "filename-20240101-111213.mp4",
+            datetime(2024, 1, 1, 11, 12, 13),
+            datetime(2024, 1, 1, 12, 13, 14),
+            2345,
+            "from_url",
+        ),
+    )
+
+    mock_print.assert_called_once_with(
+        'Wrote 2 bytes less than received during the download of "filename-20240101-111213.mp4"',
+    )
+    assert len(httpx_mock.get_requests()) == 1
 
 
 def test_download_and_delete_doesnt_delete_if_wrote_more_then_received(
     httpx_mock: HTTPXMock,
+    mocker: MockerFixture,
 ) -> None:
     """download_and_delete_video() doesn't delete a video if it wrote more bytes than it received."""
-    with patch("os.utime"), patch(
-        "pathlib.Path.stat",
-        return_value=SimpleNamespace(st_mode=33204, st_size=3),
-    ), patch(
-        "pathlib.Path.mkdir",
-    ), patch(
-        "builtins.open",
-        mock_open(),
-    ), patch("builtins.print") as mock_print:
-        httpx_mock.add_response(headers={"Content-Length": "5"}, content=b"12345")
-        download_and_delete_video(
-            Video(
-                "full%2Fpathtofile.mp4",
-                "filename-20240101-111213.mp4",
-                datetime(2024, 1, 1, 11, 12, 13),
-                datetime(2024, 1, 1, 12, 13, 14),
-                2345,
-                "from_url",
-            ),
-        )
-        mock_print.assert_called_once_with(
-            'Wrote 2 bytes more than received during the download of "filename-20240101-111213.mp4"',
-        )
+    mock_print = make_download_and_delete_video_mocks(mocker, "mock_print", st_size=3)
+    httpx_mock.add_response(headers={"Content-Length": "5"}, content=b"12345")
 
-        assert len(httpx_mock.get_requests()) == 1
+    download_and_delete_video(
+        Video(
+            "full%2Fpathtofile.mp4",
+            "filename-20240101-111213.mp4",
+            datetime(2024, 1, 1, 11, 12, 13),
+            datetime(2024, 1, 1, 12, 13, 14),
+            2345,
+            "from_url",
+        ),
+    )
+
+    mock_print.assert_called_once_with(
+        'Wrote 2 bytes more than received during the download of "filename-20240101-111213.mp4"',
+    )
+    assert len(httpx_mock.get_requests()) == 1
