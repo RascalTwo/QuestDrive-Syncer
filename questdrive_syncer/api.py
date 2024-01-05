@@ -54,6 +54,7 @@ def download_and_delete_video(
     *,
     dry: bool = False,
     delete: bool = True,
+    download: bool = True,
 ) -> None:
     """Download and delete the video."""
     url = CONFIG.questdrive_url + "download/" + video.filepath
@@ -61,7 +62,7 @@ def download_and_delete_video(
     head_response = httpx.head(url)
     expected_byte_count = int(head_response.headers.get("Content-Length", 0))
     downloaded_byte_count = expected_byte_count
-    if not dry:
+    if download and not dry:
         response = httpx.get(url)
         expected_byte_count = int(response.headers.get("Content-Length", 0))
         downloaded_byte_count = len(response.content)

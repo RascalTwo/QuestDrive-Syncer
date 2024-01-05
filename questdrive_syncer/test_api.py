@@ -430,3 +430,27 @@ def test_download_and_delete_doesnt_delete_if_delete_is_false(
     )
 
     assert len(httpx_mock.get_requests()) == 2  # noqa: PLR2004
+
+
+def test_download_and_download_doesnt_download_if_download_is_false(
+    httpx_mock: HTTPXMock,
+    mocker: MockerFixture,
+) -> None:
+    """download_and_delete_video() doesn't download a video if download is False."""
+    make_download_and_delete_video_mocks(mocker)
+    httpx_mock.add_response()
+    httpx_mock.add_response()
+
+    download_and_delete_video(
+        Video(
+            "full%2Fpathtofile.mp4",
+            "filename-20240101-111213.mp4",
+            datetime.now(),
+            datetime.now(),
+            2345,
+            "from_url",
+        ),
+        download=False,
+    )
+
+    assert len(httpx_mock.get_requests()) == 2  # noqa: PLR2004

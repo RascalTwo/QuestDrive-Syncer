@@ -58,6 +58,7 @@ def main() -> None:
                 video,
                 dry=CONFIG.dry,
                 delete=CONFIG.delete_videos,
+                download=CONFIG.download_videos,
             )
         else:
             print(

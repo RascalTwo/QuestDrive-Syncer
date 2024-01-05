@@ -14,6 +14,7 @@ class Config:
     dry: bool = False
     run_while_actively_recording: bool = True
     delete_videos: bool = True
+    download_videos: bool = True
 
 
 CONFIG = Config(questdrive_url="https://example.com/")
@@ -90,6 +91,13 @@ def parse_args(*args: str) -> Config:
         default=default_config.delete_videos,
         help="Don't delete videos from the Quest",
         dest="delete_videos",
+    )
+    parser.add_argument(
+        "--dont-download",
+        action="store_false",
+        default=default_config.download_videos,
+        help="Don't download videos from the Quest",
+        dest="download_videos",
     )
 
     return Config(**vars(parser.parse_args(args)))
