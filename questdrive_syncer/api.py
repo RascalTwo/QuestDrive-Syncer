@@ -49,7 +49,12 @@ def update_actively_recording(videos: list[Video], latest_videos: list[Video]) -
             video.actively_recording = True
 
 
-def download_and_delete_video(video: Video, *, dry: bool = False) -> None:
+def download_and_delete_video(
+    video: Video,
+    *,
+    dry: bool = False,
+    delete: bool = True,
+) -> None:
     """Download and delete the video."""
     url = CONFIG.questdrive_url + "download/" + video.filepath
 
@@ -100,5 +105,5 @@ def download_and_delete_video(video: Video, *, dry: bool = False) -> None:
             )
         return
 
-    if not dry:
+    if delete and not dry:
         httpx.get(CONFIG.questdrive_url + "delete/" + video.filepath)

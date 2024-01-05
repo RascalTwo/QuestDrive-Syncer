@@ -406,3 +406,27 @@ def test_download_and_delete_does_nothing_when_dry(
     assert len(httpx_mock.get_requests()) == 1
     mocked_open.assert_not_called()
     assert mock_stat.call_count == 1
+
+
+def test_download_and_delete_doesnt_delete_if_delete_is_false(
+    httpx_mock: HTTPXMock,
+    mocker: MockerFixture,
+) -> None:
+    """download_and_delete_video() doesn't delete a video if delete is False."""
+    make_download_and_delete_video_mocks(mocker)
+    httpx_mock.add_response()
+    httpx_mock.add_response()
+
+    download_and_delete_video(
+        Video(
+            "full%2Fpathtofile.mp4",
+            "filename-20240101-111213.mp4",
+            datetime.now(),
+            datetime.now(),
+            2345,
+            "from_url",
+        ),
+        delete=False,
+    )
+
+    assert len(httpx_mock.get_requests()) == 2  # noqa: PLR2004

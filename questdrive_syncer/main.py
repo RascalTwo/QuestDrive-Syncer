@@ -54,7 +54,11 @@ def main() -> None:
     for video in videos:
         print(video)
         if has_enough_free_space(video.mb_size):
-            download_and_delete_video(video, dry=CONFIG.dry)
+            download_and_delete_video(
+                video,
+                dry=CONFIG.dry,
+                delete=CONFIG.delete_videos,
+            )
         else:
             print(
                 f'Skipping download of "{video.filename}" because there is not enough free space',

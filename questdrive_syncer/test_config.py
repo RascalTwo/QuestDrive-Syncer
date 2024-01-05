@@ -92,6 +92,24 @@ def test_parse_args_provided_dont_run_while_actively_recording(
     assert config.run_while_actively_recording is False
 
 
+def test_parse_args_default_dont_delete(
+    mocker: MockerFixture,
+) -> None:
+    """parse_args() returns False for --dont-delete by default."""
+    config = parse_args("--questdrive-url=url")
+
+    assert config.delete_videos is True
+
+
+def test_parse_args_provided_dont_delete(
+    mocker: MockerFixture,
+) -> None:
+    """parse_args() returns True if --dont-delete is provided."""
+    config = parse_args("--questdrive-url=url", "--dont-delete")
+
+    assert config.delete_videos is False
+
+
 def test_parse_args_default_minimum_free_space(mocker: MockerFixture) -> None:
     """parse_args() returns the default minimum_free_space_mb."""
     config = parse_args("--questdrive-url=url")
