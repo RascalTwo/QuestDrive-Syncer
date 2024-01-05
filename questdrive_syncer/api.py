@@ -6,19 +6,17 @@ from pathlib import Path
 
 import httpx
 
-from questdrive_syncer.constants import (
-    OUTPUT_PATH,
-    QUEST_DRIVE_URL,
+from .config import CONFIG
+from .constants import (
     VIDEO_SHOTS_PATH,
 )
-
 from .structures import MissingVideoError, Video
 
 
 def is_online() -> bool:
     """Check if QuestDrive is online."""
     try:
-        response = httpx.get(QUEST_DRIVE_URL)
+        response = httpx.get(CONFIG.questdrive_url)
     except httpx.ConnectError:
         return False
     else:
@@ -27,7 +25,7 @@ def is_online() -> bool:
 
 def fetch_video_list_html() -> tuple[str, str]:
     """Fetch the URL and HTML of the video list."""
-    url = QUEST_DRIVE_URL + VIDEO_SHOTS_PATH
+    url = CONFIG.questdrive_url + VIDEO_SHOTS_PATH
     response = httpx.get(url)
     return url, response.text
 
@@ -53,14 +51,12 @@ def update_actively_recording(videos: list[Video], latest_videos: list[Video]) -
 
 def download_and_delete_video(video: Video) -> None:
     """Download and delete the video."""
-    Path(OUTPUT_PATH).mkdir(parents=True, exist_ok=True)
-
-    url = QUEST_DRIVE_URL + "download/" + video.filepath
+    url = CONFIG.questdrive_url + "download/" + video.filepath
     response = httpx.get(url)
-    with Path(f"{OUTPUT_PATH}/{video.filename}").open("wb") as f:
+    with Path(f"{CONFIG.output_path}{video.filename}").open("wb") as f:
         f.write(response.content)
     os.utime(
-        f"{OUTPUT_PATH}/{video.filename}",
+        f"{CONFIG.output_path}{video.filename}",
         (video.created_at.timestamp(), video.modified_at.timestamp()),
     )
 
@@ -82,7 +78,7 @@ def download_and_delete_video(video: Video) -> None:
             )
         return
 
-    written_length = Path(f"{OUTPUT_PATH}/{video.filename}").stat().st_size
+    written_length = Path(f"{CONFIG.output_path}{video.filename}").stat().st_size
     written_length_diff = len(response.content) - written_length
     if written_length_diff:
         if written_length_diff > 0:
@@ -95,4 +91,4 @@ def download_and_delete_video(video: Video) -> None:
             )
         return
 
-    httpx.get(QUEST_DRIVE_URL + "delete/" + video.filepath)
+    httpx.get(CONFIG.questdrive_url + "delete/" + video.filepath)

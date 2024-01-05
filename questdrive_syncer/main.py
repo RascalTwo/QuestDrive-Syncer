@@ -2,23 +2,28 @@
 import sys
 import time
 
+from questdrive_syncer.config import init_config
+
 from .api import (
     download_and_delete_video,
     fetch_video_list_html,
     is_online,
     update_actively_recording,
 )
-from .constants import FAILURE_EXIT_CODE, QUEST_DRIVE_URL
+from .config import CONFIG
+from .constants import FAILURE_EXIT_CODE
 from .helpers import has_enough_free_space
 from .parsers import parse_video_list_html
 
 
 def main() -> None:
     """Perform all actions."""
+    init_config(*sys.argv[1:])
+
     if not is_online():
-        print(f'QuestDrive not found at "{QUEST_DRIVE_URL}"')
+        print(f'QuestDrive not found at "{CONFIG.questdrive_url}"')
         sys.exit(FAILURE_EXIT_CODE)
-    print(f"QuestDrive found running at {QUEST_DRIVE_URL}")
+    print(f'QuestDrive found running at "{CONFIG.questdrive_url}"')
 
     videos = parse_video_list_html(*fetch_video_list_html())
     time.sleep(1)

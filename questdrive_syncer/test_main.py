@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import dataclasses
+import sys
 from datetime import datetime
 from operator import itemgetter
 from typing import TYPE_CHECKING, Any
@@ -25,6 +26,7 @@ def make_main_mocks(
     has_enough_free_space: bool = True,
 ) -> Any:  # noqa: ANN401
     """Create mocks for main()."""
+    sys.argv = ["", "--questdrive-url=url"]
     mock_print = mocker.patch("builtins.print")
     mocker.patch("questdrive_syncer.main.is_online", return_value=is_online)
     mocker.patch("time.sleep")
@@ -71,7 +73,7 @@ def test_message_if_not_online(mocker: MockerFixture) -> None:
         main()
 
     mock_print.assert_called_once_with(
-        'QuestDrive not found at "http://192.168.254.75:7123/"',
+        'QuestDrive not found at "url/"',
     )
 
 
@@ -97,7 +99,7 @@ def test_print_when_successful(mocker: MockerFixture) -> None:
     main()
 
     mock_print.assert_any_call(
-        "QuestDrive found running at http://192.168.254.75:7123/",
+        'QuestDrive found running at "url/"',
     )
 
 

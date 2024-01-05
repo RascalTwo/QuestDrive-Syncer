@@ -47,7 +47,7 @@ def test_fetch_video_list_html(httpx_mock: HTTPXMock) -> None:
     """fetch_video_list_html() returns the URL & HTML."""
     httpx_mock.add_response(text="html")
     assert fetch_video_list_html() == (
-        "http://192.168.254.75:7123/list/storage/emulated/0/Oculus/VideoShots/",
+        "https://example.com/list/storage/emulated/0/Oculus/VideoShots/",
         "html",
     )
 
@@ -116,7 +116,6 @@ def make_download_and_delete_video_mocks(
     st_size: int = 0,
 ) -> Any:  # noqa: ANN401
     """Create mocks for download_and_delete_video()."""
-    mock_mkdir = mocker.patch("pathlib.Path.mkdir")
     mocked_open = mocker.patch("pathlib.Path.open", mock_open())
     mocker.patch(
         "pathlib.Path.stat",
@@ -129,34 +128,11 @@ def make_download_and_delete_video_mocks(
 
     return itemgetter(*desired)(
         {
-            "mock_mkdir": mock_mkdir,
             "mocked_open": mocked_open,
             "mock_utime": mock_utime,
             "mock_print": mock_print,
         },
     )
-
-
-def test_download_and_delete_creates_output_directory(
-    httpx_mock: HTTPXMock,
-    mocker: MockerFixture,
-) -> None:
-    """download_and_delete_video() creates the output directory."""
-    mock_mkdir = make_download_and_delete_video_mocks(mocker, "mock_mkdir")
-    httpx_mock.add_response()
-
-    download_and_delete_video(
-        Video(
-            "full%2Fpathtofile.mp4",
-            "filename-20240101-111213.mp4",
-            datetime(2024, 1, 1, 11, 12, 13),
-            datetime(2024, 1, 1, 12, 13, 14),
-            2345,
-            "from_url",
-        ),
-    )
-
-    mock_mkdir.assert_called_once_with(parents=True, exist_ok=True)
 
 
 def test_download_and_delete_requests_correct_url(
@@ -180,9 +156,7 @@ def test_download_and_delete_requests_correct_url(
 
     request = httpx_mock.get_requests()[0]
     assert request
-    assert (
-        str(request.url) == "http://192.168.254.75:7123/download/full%2Fpathtofile.mp4"
-    )
+    assert str(request.url) == "https://example.com/download/full%2Fpathtofile.mp4"
 
 
 def test_download_and_delete_writes_to_correct_path(
@@ -243,7 +217,7 @@ def test_download_and_delete_calls_delete_url(
 
     request = httpx_mock.get_requests()[1]
     assert request
-    assert str(request.url) == "http://192.168.254.75:7123/delete/full%2Fpathtofile.mp4"
+    assert str(request.url) == "https://example.com/delete/full%2Fpathtofile.mp4"
 
 
 def test_download_and_delete_doesnt_delete_actively_recording(

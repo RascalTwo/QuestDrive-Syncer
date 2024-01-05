@@ -8,9 +8,13 @@ The primary use for this is moving recorded videos from a Quest - as it has limi
 
 A Quest device running QuestDrive, and a computer with Python 3.9+ and enough space to store the synced data.
 
+## Usage
+
 ```shell
-poetry run python questdrive_syncer
+poetry run python questdrive_syncer --questdrive-url=URL_OF_QUESTDRIVE_INSTANCE
 ```
+
+You can additionally use the `--help` flag to see all available options.
 
 ## Development
 
