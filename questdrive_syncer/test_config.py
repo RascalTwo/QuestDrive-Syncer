@@ -26,38 +26,52 @@ def test_parse_args_default_questdrive_url(
 
 
 def test_parse_args_custom_questdrive_url(mocker: MockerFixture) -> None:
-    """parse_args() returns a custom questdrive_url."""
+    """parse_args() returns the provided questdrive_url."""
     config = parse_args("--questdrive-url=url")
 
     assert config.questdrive_url == "url/"
 
 
 def test_parse_args_default_output_path(mocker: MockerFixture) -> None:
-    """parse_args() returns the default output_path."""
+    """parse_args() returns a default output_path of "output/"."""
     config = parse_args("--questdrive-url=url")
 
     assert config.output_path == "output/"
 
 
 def test_parse_args_custom_output_path(mocker: MockerFixture) -> None:
-    """parse_args() returns a custom output_path."""
+    """parse_args() returns the provided output_path."""
     config = parse_args("--questdrive-url=url", "--output=./wherever/")
 
     assert config.output_path == "./wherever/"
 
 
 def test_parse_args_default_wait_for_questdrive(mocker: MockerFixture) -> None:
-    """parse_args() returns the default wait_for_questdrive."""
+    """parse_args() returns False for wait_for_questdrive by default."""
     config = parse_args("--questdrive-url=url")
 
     assert config.wait_for_questdrive is False
 
 
 def test_parse_args_custom_wait_for_questdrive(mocker: MockerFixture) -> None:
-    """parse_args() returns a custom wait_for_questdrive."""
+    """parse_args() returns True if provided --wait-for-questdrive."""
     config = parse_args("--questdrive-url=url", "--wait-for-questdrive")
 
     assert config.wait_for_questdrive is True
+
+
+def test_parse_args_default_dry(mocker: MockerFixture) -> None:
+    """parse_args() returns False for --dry by default."""
+    config = parse_args("--questdrive-url=url")
+
+    assert config.dry is False
+
+
+def test_parse_args_custom_dry(mocker: MockerFixture) -> None:
+    """parse_args() returns True if --dry is provided."""
+    config = parse_args("--questdrive-url=url", "--dry")
+
+    assert config.dry is True
 
 
 def test_parse_args_default_minimum_free_space(mocker: MockerFixture) -> None:

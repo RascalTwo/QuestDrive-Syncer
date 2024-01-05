@@ -71,6 +71,15 @@ def make_main_mocks(
     )
 
 
+def test_prints_when_in_dry_mode(mocker: MockerFixture) -> None:
+    """main() prints when in dry mode."""
+    mock_print = make_main_mocks(mocker, "mock_print", args=("--dry",))
+
+    main()
+
+    mock_print.assert_any_call("Dry run enabled, no actions will be performed.")
+
+
 def test_message_if_not_online(mocker: MockerFixture) -> None:
     """main() prints a message if QuestDrive is not online."""
     mock_print = make_main_mocks(mocker, "mock_print", is_online=False)
@@ -182,12 +191,12 @@ def test_prints_and_downloads_each_video_from_smallest_to_largest(
 
     mock_print.assert_any_call(video)
     mock_print.assert_called_with(second_video)
-    mock_download_and_delete_video.assert_any_call(video)
-    mock_download_and_delete_video.assert_called_with(second_video)
+    mock_download_and_delete_video.assert_any_call(video, dry=False)
+    mock_download_and_delete_video.assert_called_with(second_video, dry=False)
 
 
-def test_doesnt_download_video_if_not_enough_space(mocker: MockerFixture) -> None:
-    """main() doesn't download a video if there is not enough space."""
+def test_doesnt_call_download_video_if_not_enough_space(mocker: MockerFixture) -> None:
+    """main() doesn't call for the downloading & deleting of a video if there is not enough space."""
     (
         mock_print,
         mock_has_enough_free_space,

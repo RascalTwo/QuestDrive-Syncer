@@ -117,7 +117,7 @@ def make_download_and_delete_video_mocks(
 ) -> Any:  # noqa: ANN401
     """Create mocks for download_and_delete_video()."""
     mocked_open = mocker.patch("pathlib.Path.open", mock_open())
-    mocker.patch(
+    mock_stat = mocker.patch(
         "pathlib.Path.stat",
         return_value=SimpleNamespace(st_mode=33204, st_size=st_size),
     )
@@ -129,6 +129,7 @@ def make_download_and_delete_video_mocks(
     return itemgetter(*desired)(
         {
             "mocked_open": mocked_open,
+            "mock_stat": mock_stat,
             "mock_utime": mock_utime,
             "mock_print": mock_print,
         },
@@ -142,6 +143,7 @@ def test_download_and_delete_requests_correct_url(
     """download_and_delete_video() calls the correct URL."""
     make_download_and_delete_video_mocks(mocker)
     httpx_mock.add_response()
+    httpx_mock.add_response()
 
     download_and_delete_video(
         Video(
@@ -154,7 +156,7 @@ def test_download_and_delete_requests_correct_url(
         ),
     )
 
-    request = httpx_mock.get_requests()[0]
+    request = httpx_mock.get_requests()[1]
     assert request
     assert str(request.url) == "https://example.com/download/full%2Fpathtofile.mp4"
 
@@ -170,6 +172,7 @@ def test_download_and_delete_writes_to_correct_path(
         "mocked_open",
         "mock_utime",
     )
+    httpx_mock.add_response()
     httpx_mock.add_response(content=one_mb)
 
     download_and_delete_video(
@@ -195,12 +198,12 @@ def test_download_and_delete_writes_to_correct_path(
     )
 
 
-def test_download_and_delete_calls_delete_url(
+def test_download_and_delete_calls_stat_on_written_file(
     httpx_mock: HTTPXMock,
     mocker: MockerFixture,
 ) -> None:
-    """download_and_delete_video() calls the correct URL when deleting."""
-    make_download_and_delete_video_mocks(mocker)
+    """download_and_delete_video() calls stat() on the written file."""
+    mock_stat = make_download_and_delete_video_mocks(mocker, "mock_stat")
     httpx_mock.add_response()
     httpx_mock.add_response()
 
@@ -215,7 +218,32 @@ def test_download_and_delete_calls_delete_url(
         ),
     )
 
-    request = httpx_mock.get_requests()[1]
+    # each https call additionally calls stat(), so 3 httpx calls + 1 my call
+    assert mock_stat.call_count == 4  # noqa: PLR2004
+
+
+def test_download_and_delete_calls_delete_url(
+    httpx_mock: HTTPXMock,
+    mocker: MockerFixture,
+) -> None:
+    """download_and_delete_video() calls the correct URL when deleting."""
+    make_download_and_delete_video_mocks(mocker)
+    httpx_mock.add_response()
+    httpx_mock.add_response()
+    httpx_mock.add_response()
+
+    download_and_delete_video(
+        Video(
+            "full%2Fpathtofile.mp4",
+            "filename-20240101-111213.mp4",
+            datetime(2024, 1, 1, 11, 12, 13),
+            datetime(2024, 1, 1, 12, 13, 14),
+            2345,
+            "from_url",
+        ),
+    )
+
+    request = httpx_mock.get_requests()[2]
     assert request
     assert str(request.url) == "https://example.com/delete/full%2Fpathtofile.mp4"
 
@@ -226,6 +254,7 @@ def test_download_and_delete_doesnt_delete_actively_recording(
 ) -> None:
     """download_and_delete_video() doesn't delete a video if it's actively recording."""
     mock_print = make_download_and_delete_video_mocks(mocker, "mock_print")
+    httpx_mock.add_response()
     httpx_mock.add_response()
 
     download_and_delete_video(
@@ -243,7 +272,7 @@ def test_download_and_delete_doesnt_delete_actively_recording(
     mock_print.assert_called_once_with(
         '"filename-20240101-111213.mp4" is actively recording, not deleting',
     )
-    assert len(httpx_mock.get_requests()) == 1
+    assert len(httpx_mock.get_requests()) == 2  # noqa: PLR2004
 
 
 def test_download_and_delete_doesnt_delete_if_expecting_more_content(
@@ -252,6 +281,7 @@ def test_download_and_delete_doesnt_delete_if_expecting_more_content(
 ) -> None:
     """download_and_delete_video() doesn't delete a video if it's expecting more content."""
     mock_print = make_download_and_delete_video_mocks(mocker, "mock_print")
+    httpx_mock.add_response()
     httpx_mock.add_response(headers={"Content-Length": "5"}, content=b"123")
 
     download_and_delete_video(
@@ -268,7 +298,7 @@ def test_download_and_delete_doesnt_delete_if_expecting_more_content(
     mock_print.assert_called_once_with(
         'Received 2 bytes less than expected during the download of "filename-20240101-111213.mp4"',
     )
-    assert len(httpx_mock.get_requests()) == 1
+    assert len(httpx_mock.get_requests()) == 2  # noqa: PLR2004
 
 
 def test_download_and_delete_doesnt_delete_if_received_more_content_then_expected(
@@ -277,6 +307,7 @@ def test_download_and_delete_doesnt_delete_if_received_more_content_then_expecte
 ) -> None:
     """download_and_delete_video() doesn't delete a video if it received more content than expected."""
     mock_print = make_download_and_delete_video_mocks(mocker, "mock_print")
+    httpx_mock.add_response()
     httpx_mock.add_response(headers={"Content-Length": "3"}, content=b"12345")
 
     download_and_delete_video(
@@ -293,7 +324,7 @@ def test_download_and_delete_doesnt_delete_if_received_more_content_then_expecte
     mock_print.assert_called_once_with(
         'Received 2 bytes more than expected during the download of "filename-20240101-111213.mp4"',
     )
-    assert len(httpx_mock.get_requests()) == 1
+    assert len(httpx_mock.get_requests()) == 2  # noqa: PLR2004
 
 
 def test_download_and_delete_doesnt_delete_if_wrote_less_then_received(
@@ -302,6 +333,7 @@ def test_download_and_delete_doesnt_delete_if_wrote_less_then_received(
 ) -> None:
     """download_and_delete_video() doesn't delete a video if it wrote less bytes than it received."""
     mock_print = make_download_and_delete_video_mocks(mocker, "mock_print", st_size=7)
+    httpx_mock.add_response()
     httpx_mock.add_response(headers={"Content-Length": "5"}, content=b"12345")
 
     download_and_delete_video(
@@ -318,7 +350,7 @@ def test_download_and_delete_doesnt_delete_if_wrote_less_then_received(
     mock_print.assert_called_once_with(
         'Wrote 2 bytes less than received during the download of "filename-20240101-111213.mp4"',
     )
-    assert len(httpx_mock.get_requests()) == 1
+    assert len(httpx_mock.get_requests()) == 2  # noqa: PLR2004
 
 
 def test_download_and_delete_doesnt_delete_if_wrote_more_then_received(
@@ -327,6 +359,7 @@ def test_download_and_delete_doesnt_delete_if_wrote_more_then_received(
 ) -> None:
     """download_and_delete_video() doesn't delete a video if it wrote more bytes than it received."""
     mock_print = make_download_and_delete_video_mocks(mocker, "mock_print", st_size=3)
+    httpx_mock.add_response()
     httpx_mock.add_response(headers={"Content-Length": "5"}, content=b"12345")
 
     download_and_delete_video(
@@ -343,4 +376,33 @@ def test_download_and_delete_doesnt_delete_if_wrote_more_then_received(
     mock_print.assert_called_once_with(
         'Wrote 2 bytes more than received during the download of "filename-20240101-111213.mp4"',
     )
+    assert len(httpx_mock.get_requests()) == 2  # noqa: PLR2004
+
+
+def test_download_and_delete_does_nothing_when_dry(
+    httpx_mock: HTTPXMock,
+    mocker: MockerFixture,
+) -> None:
+    """download_and_delete_video() does nothing when dry."""
+    mocked_open, mock_stat = make_download_and_delete_video_mocks(
+        mocker,
+        "mocked_open",
+        "mock_stat",
+    )
+    httpx_mock.add_response(headers={"Content-Length": "5"})
+
+    download_and_delete_video(
+        Video(
+            "full%2Fpathtofile.mp4",
+            "filename-20240101-111213.mp4",
+            datetime(2024, 1, 1, 11, 12, 13),
+            datetime(2024, 1, 1, 12, 13, 15),
+            2345,
+            "from_url",
+        ),
+        dry=True,
+    )
+
     assert len(httpx_mock.get_requests()) == 1
+    mocked_open.assert_not_called()
+    assert mock_stat.call_count == 1

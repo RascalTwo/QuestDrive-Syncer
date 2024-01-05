@@ -11,6 +11,7 @@ class Config:
     output_path: str = "output/"
     minimum_free_space_mb: float = 1024
     wait_for_questdrive: bool = False
+    dry: bool = False
 
 
 CONFIG = Config(questdrive_url="https://example.com/")
@@ -67,6 +68,12 @@ def parse_args(*args: str) -> Config:
         action="store_true",
         default=default_config.wait_for_questdrive,
         help="Instead of failing if QuestDrive is not found, wait for it to come online",
+    )
+    parser.add_argument(
+        "--dry",
+        action="store_true",
+        default=default_config.dry,
+        help="Perform no actions, just log what would be done",
     )
 
     return Config(**vars(parser.parse_args(args)))

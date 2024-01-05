@@ -49,24 +49,30 @@ def update_actively_recording(videos: list[Video], latest_videos: list[Video]) -
             video.actively_recording = True
 
 
-def download_and_delete_video(video: Video) -> None:
+def download_and_delete_video(video: Video, *, dry: bool = False) -> None:
     """Download and delete the video."""
     url = CONFIG.questdrive_url + "download/" + video.filepath
-    response = httpx.get(url)
-    with Path(f"{CONFIG.output_path}{video.filename}").open("wb") as f:
-        f.write(response.content)
-    os.utime(
-        f"{CONFIG.output_path}{video.filename}",
-        (video.created_at.timestamp(), video.modified_at.timestamp()),
-    )
+
+    head_response = httpx.head(url)
+    expected_byte_count = int(head_response.headers.get("Content-Length", 0))
+    downloaded_byte_count = expected_byte_count
+    if not dry:
+        response = httpx.get(url)
+        expected_byte_count = int(response.headers.get("Content-Length", 0))
+        downloaded_byte_count = len(response.content)
+
+        with Path(f"{CONFIG.output_path}{video.filename}").open("wb") as f:
+            f.write(response.content)
+        os.utime(
+            f"{CONFIG.output_path}{video.filename}",
+            (video.created_at.timestamp(), video.modified_at.timestamp()),
+        )
 
     if video.actively_recording:
         print(f'"{video.filename}" is actively recording, not deleting')
         return
 
-    content_length_diff = len(response.content) - int(
-        response.headers.get("Content-Length", len(response.content)),
-    )
+    content_length_diff = downloaded_byte_count - expected_byte_count
     if content_length_diff:
         if content_length_diff > 0:
             print(
@@ -78,8 +84,11 @@ def download_and_delete_video(video: Video) -> None:
             )
         return
 
-    written_length = Path(f"{CONFIG.output_path}{video.filename}").stat().st_size
-    written_length_diff = len(response.content) - written_length
+    written_length = downloaded_byte_count
+    if not dry:
+        written_length = Path(f"{CONFIG.output_path}{video.filename}").stat().st_size
+
+    written_length_diff = downloaded_byte_count - written_length
     if written_length_diff:
         if written_length_diff > 0:
             print(
@@ -91,4 +100,5 @@ def download_and_delete_video(video: Video) -> None:
             )
         return
 
-    httpx.get(CONFIG.questdrive_url + "delete/" + video.filepath)
+    if not dry:
+        httpx.get(CONFIG.questdrive_url + "delete/" + video.filepath)
