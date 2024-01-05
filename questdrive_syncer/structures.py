@@ -4,15 +4,6 @@ from datetime import datetime
 
 
 @dataclass
-class Config:
-    """Configuration."""
-
-    questdrive_url: str
-    output_path: str = "output/"
-    minimum_free_space_mb: float = 1024
-
-
-@dataclass
 class Video:
     """Video representation."""
 

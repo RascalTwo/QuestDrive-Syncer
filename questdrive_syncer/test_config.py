@@ -46,6 +46,20 @@ def test_parse_args_custom_output_path(mocker: MockerFixture) -> None:
     assert config.output_path == "./wherever/"
 
 
+def test_parse_args_default_wait_for_questdrive(mocker: MockerFixture) -> None:
+    """parse_args() returns the default wait_for_questdrive."""
+    config = parse_args("--questdrive-url=url")
+
+    assert config.wait_for_questdrive is False
+
+
+def test_parse_args_custom_wait_for_questdrive(mocker: MockerFixture) -> None:
+    """parse_args() returns a custom wait_for_questdrive."""
+    config = parse_args("--questdrive-url=url", "--wait-for-questdrive")
+
+    assert config.wait_for_questdrive is True
+
+
 def test_parse_args_default_minimum_free_space(mocker: MockerFixture) -> None:
     """parse_args() returns the default minimum_free_space_mb."""
     config = parse_args("--questdrive-url=url")

@@ -20,16 +20,20 @@ if TYPE_CHECKING:  # pragma: no cover
 def make_main_mocks(
     mocker: MockerFixture,
     *desired: str,
-    is_online: bool = True,
+    is_online: bool | list[bool] = True,
     fetch_video_list_html: tuple[str, str] = ("url", "html"),
     parse_video_list_html: None | list[Video] = None,
     has_enough_free_space: bool = True,
+    args: tuple[str, ...] = (),
 ) -> Any:  # noqa: ANN401
     """Create mocks for main()."""
-    sys.argv = ["", "--questdrive-url=url"]
+    sys.argv = ["", "--questdrive-url=url", *args]
     mock_print = mocker.patch("builtins.print")
-    mocker.patch("questdrive_syncer.main.is_online", return_value=is_online)
-    mocker.patch("time.sleep")
+    mock_is_online = mocker.patch(
+        "questdrive_syncer.main.is_online",
+        side_effect=is_online if isinstance(is_online, list) else [is_online],
+    )
+    mock_sleep = mocker.patch("time.sleep")
     mock_fetch_video_list_html = mocker.patch(
         "questdrive_syncer.main.fetch_video_list_html",
         return_value=fetch_video_list_html,
@@ -55,6 +59,8 @@ def make_main_mocks(
 
     return itemgetter(*desired)(
         {
+            "mock_is_online": mock_is_online,
+            "mock_sleep": mock_sleep,
             "mock_print": mock_print,
             "mock_fetch_video_list_html": mock_fetch_video_list_html,
             "mock_parse_video_list_html": mock_parse_video_list_html,
@@ -85,6 +91,26 @@ def test_failed_status_code(mocker: MockerFixture) -> None:
         main()
 
     assert exc_info.value.code == FAILURE_EXIT_CODE
+
+
+def test_waits_for_questdrive_if_wait_for_questdrive(mocker: MockerFixture) -> None:
+    """main() waits for QuestDrive if wait_for_questdrive is True."""
+    mock_is_online, mock_print, mock_sleep = make_main_mocks(
+        mocker,
+        "mock_is_online",
+        "mock_print",
+        "mock_sleep",
+        is_online=[False, True],
+        args=("--wait-for-questdrive",),
+    )
+
+    main()
+
+    mock_print.assert_any_call(
+        'Waiting for QuestDrive at "url/"...',
+    )
+    assert mock_is_online.call_count == 2  # noqa: PLR2004
+    mock_sleep.assert_any_call(5 * 60)
 
 
 video = Video("filepath", "filename", datetime.now(), datetime.now(), 1.23, "url")

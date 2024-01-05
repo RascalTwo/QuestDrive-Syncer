@@ -11,7 +11,7 @@ from .api import (
     update_actively_recording,
 )
 from .config import CONFIG
-from .constants import FAILURE_EXIT_CODE
+from .constants import FAILURE_EXIT_CODE, QUESTDRIVE_POLL_RATE_MINUTES
 from .helpers import has_enough_free_space
 from .parsers import parse_video_list_html
 
@@ -20,9 +20,14 @@ def main() -> None:
     """Perform all actions."""
     init_config(*sys.argv[1:])
 
-    if not is_online():
+    if CONFIG.wait_for_questdrive:
+        while not is_online():
+            print(f'Waiting for QuestDrive at "{CONFIG.questdrive_url}"...')
+            time.sleep(QUESTDRIVE_POLL_RATE_MINUTES * 60)
+    elif not is_online():
         print(f'QuestDrive not found at "{CONFIG.questdrive_url}"')
         sys.exit(FAILURE_EXIT_CODE)
+
     print(f'QuestDrive found running at "{CONFIG.questdrive_url}"')
 
     videos = parse_video_list_html(*fetch_video_list_html())
