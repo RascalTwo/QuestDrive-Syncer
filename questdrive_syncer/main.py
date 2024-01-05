@@ -11,7 +11,11 @@ from .api import (
     update_actively_recording,
 )
 from .config import CONFIG
-from .constants import FAILURE_EXIT_CODE, QUESTDRIVE_POLL_RATE_MINUTES
+from .constants import (
+    ACTIVELY_RECORDING_EXIT_CODE,
+    FAILURE_EXIT_CODE,
+    QUESTDRIVE_POLL_RATE_MINUTES,
+)
 from .helpers import has_enough_free_space
 from .parsers import parse_video_list_html
 
@@ -40,6 +44,12 @@ def main() -> None:
     update_actively_recording(videos, parse_video_list_html(*fetch_video_list_html()))
 
     videos = sorted(videos, key=lambda video: video.mb_size)
+
+    if not CONFIG.run_while_actively_recording and any(
+        video.actively_recording for video in videos
+    ):
+        print("Quest is actively recording, exiting.")
+        sys.exit(ACTIVELY_RECORDING_EXIT_CODE)
 
     for video in videos:
         print(video)

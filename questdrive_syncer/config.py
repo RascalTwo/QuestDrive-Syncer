@@ -12,6 +12,7 @@ class Config:
     minimum_free_space_mb: float = 1024
     wait_for_questdrive: bool = False
     dry: bool = False
+    run_while_actively_recording: bool = True
 
 
 CONFIG = Config(questdrive_url="https://example.com/")
@@ -74,6 +75,13 @@ def parse_args(*args: str) -> Config:
         action="store_true",
         default=default_config.dry,
         help="Perform no actions, just log what would be done",
+    )
+    parser.add_argument(
+        "--dont-run-while-actively-recording",
+        action="store_false",
+        default=default_config.run_while_actively_recording,
+        help="Don't run if the Quest is actively recording",
+        dest="run_while_actively_recording",
     )
 
     return Config(**vars(parser.parse_args(args)))

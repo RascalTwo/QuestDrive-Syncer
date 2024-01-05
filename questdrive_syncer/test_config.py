@@ -53,7 +53,7 @@ def test_parse_args_default_wait_for_questdrive(mocker: MockerFixture) -> None:
     assert config.wait_for_questdrive is False
 
 
-def test_parse_args_custom_wait_for_questdrive(mocker: MockerFixture) -> None:
+def test_parse_args_provided_wait_for_questdrive(mocker: MockerFixture) -> None:
     """parse_args() returns True if provided --wait-for-questdrive."""
     config = parse_args("--questdrive-url=url", "--wait-for-questdrive")
 
@@ -67,11 +67,29 @@ def test_parse_args_default_dry(mocker: MockerFixture) -> None:
     assert config.dry is False
 
 
-def test_parse_args_custom_dry(mocker: MockerFixture) -> None:
+def test_parse_args_provided_dry(mocker: MockerFixture) -> None:
     """parse_args() returns True if --dry is provided."""
     config = parse_args("--questdrive-url=url", "--dry")
 
     assert config.dry is True
+
+
+def test_parse_args_default_dont_run_while_actively_recording(
+    mocker: MockerFixture,
+) -> None:
+    """parse_args() returns False for --dont-run-while-actively-recording by default."""
+    config = parse_args("--questdrive-url=url")
+
+    assert config.run_while_actively_recording is True
+
+
+def test_parse_args_provided_dont_run_while_actively_recording(
+    mocker: MockerFixture,
+) -> None:
+    """parse_args() returns True if --dont-run-while-actively-recording is provided."""
+    config = parse_args("--questdrive-url=url", "--dont-run-while-actively-recording")
+
+    assert config.run_while_actively_recording is False
 
 
 def test_parse_args_default_minimum_free_space(mocker: MockerFixture) -> None:

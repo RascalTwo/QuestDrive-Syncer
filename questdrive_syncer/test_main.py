@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from .constants import FAILURE_EXIT_CODE
+from .constants import ACTIVELY_RECORDING_EXIT_CODE, FAILURE_EXIT_CODE
 from .main import main
 from .structures import Video
 
@@ -174,6 +174,30 @@ def test_calls_update_actively_recording(mocker: MockerFixture) -> None:
     main()
 
     mock_update_actively_recording.assert_called_with([video], [video])
+
+
+def test_dont_continue_if_actively_recording_and_configured(
+    mocker: MockerFixture,
+) -> None:
+    """main() doesn't continue if the Quest is actively recording when the configuration is set accordingly."""
+    active_video = dataclasses.replace(video)
+    active_video.actively_recording = True
+    mock_print, mock_has_enough_free_space = make_main_mocks(
+        mocker,
+        "mock_print",
+        "mock_has_enough_free_space",
+        parse_video_list_html=[active_video],
+        args=("--dont-run-while-actively-recording",),
+    )
+
+    with pytest.raises(SystemExit) as e:
+        main()
+
+    assert e.value.code == ACTIVELY_RECORDING_EXIT_CODE
+    mock_print.assert_called_with(
+        "Quest is actively recording, exiting.",
+    )
+    mock_has_enough_free_space.assert_not_called()
 
 
 def test_prints_and_downloads_each_video_from_smallest_to_largest(
