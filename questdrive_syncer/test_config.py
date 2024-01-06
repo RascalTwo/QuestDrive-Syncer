@@ -71,20 +71,6 @@ def test_parse_args_provided_wait_for_questdrive(mocker: MockerFixture) -> None:
     assert config.wait_for_questdrive is True
 
 
-def test_parse_args_default_dry(mocker: MockerFixture) -> None:
-    """parse_args() returns False for --dry by default."""
-    config = parse_args("--questdrive-url=url")
-
-    assert config.dry is False
-
-
-def test_parse_args_provided_dry(mocker: MockerFixture) -> None:
-    """parse_args() returns True if --dry is provided."""
-    config = parse_args("--questdrive-url=url", "--dry")
-
-    assert config.dry is True
-
-
 def test_parse_args_default_dont_run_while_actively_recording(
     mocker: MockerFixture,
 ) -> None:
@@ -134,8 +120,17 @@ def test_parse_args_provided_dont_download(
     mocker: MockerFixture,
 ) -> None:
     """parse_args() returns True if --dont-download is provided."""
+    mock_print = mocker.patch("builtins.print")
+    mock_sleep = mocker.patch("time.sleep")
+
     config = parse_args("--questdrive-url=url", "--dont-download")
 
+    mock_print.assert_called_once()
+    assert (
+        "Current configuration will delete videos without downloading"
+        in mock_print.mock_calls[0].args[0]
+    )
+    mock_sleep.assert_called_once_with(15)
     assert config.download_videos is False
 
 
@@ -164,3 +159,20 @@ def test_parse_args_custom_minimum_free_space_must_be_greater_then_0(
     assert (
         "argument --minimum-free-space: can't be less then 0" in capsys.readouterr().err
     )
+
+
+def test_parse_args_warn_if_deleting_without_downloading(
+    mocker: MockerFixture,
+) -> None:
+    """parse_args() warns if deleting videos without downloading."""
+    mock_print = mocker.patch("builtins.print")
+    mock_sleep = mocker.patch("time.sleep")
+
+    parse_args("--questdrive-url=url", "--dont-download")
+
+    mock_print.assert_called_once()
+    assert (
+        "Current configuration will delete videos without downloading"
+        in mock_print.mock_calls[0].args[0]
+    )
+    mock_sleep.assert_called_once_with(15)

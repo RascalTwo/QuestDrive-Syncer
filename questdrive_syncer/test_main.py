@@ -65,15 +65,6 @@ def make_main_mocks(
     )
 
 
-def test_prints_when_in_dry_mode(mocker: MockerFixture) -> None:
-    """main() prints when in dry mode."""
-    mock_print = make_main_mocks(mocker, "mock_print", args=("--dry",))
-
-    main()
-
-    mock_print.assert_any_call("Dry run enabled, no actions will be performed.")
-
-
 def test_message_if_not_online(mocker: MockerFixture) -> None:
     """main() prints a message if QuestDrive is not online."""
     mock_print = make_main_mocks(mocker, "mock_print", is_online=False)
@@ -209,7 +200,6 @@ def test_prints_and_downloads_each_video_from_smallest_to_largest(
 
     mock_download_and_delete_videos.assert_called_with(
         [video, second_video],
-        dry=False,
         delete=True,
         download=True,
     )

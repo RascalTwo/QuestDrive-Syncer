@@ -18,7 +18,6 @@ if TYPE_CHECKING:  # pragma: no cover
 def download_and_delete_videos(
     videos: list[Video],
     *,
-    dry: bool = False,
     delete: bool = True,
     download: bool = True,
 ) -> None:
@@ -63,7 +62,6 @@ def download_and_delete_videos(
 
             for value in download_and_delete_video(
                 video,
-                dry=dry,
                 delete=delete,
                 download=download,
             ):
@@ -82,19 +80,19 @@ def download_and_delete_videos(
 def download_and_delete_video(
     video: Video,
     *,
-    dry: bool = False,
     delete: bool = True,
     download: bool = True,
 ) -> Iterator[float | int | str]:
     """Download and delete the video."""
     url = CONFIG.questdrive_url + "download/" + video.filepath
+    video_output_filepath = f"{CONFIG.output_path}{video.filename}"
 
     head_response = httpx.head(url)
     expected_byte_count = int(head_response.headers.get("Content-Length", 0))
     downloaded_byte_count = expected_byte_count
-    if download and not dry:
+    if download:
         with httpx.stream("GET", url) as response, Path(
-            f"{CONFIG.output_path}{video.filename}",
+            video_output_filepath,
         ).open("wb") as file:
             expected_byte_count = int(response.headers.get("Content-Length", 0))
             yield float(expected_byte_count)
@@ -107,7 +105,7 @@ def download_and_delete_video(
                 yield chunk_length
 
         os.utime(
-            f"{CONFIG.output_path}{video.filename}",
+            video_output_filepath,
             (video.created_at.timestamp(), video.modified_at.timestamp()),
         )
 
@@ -126,8 +124,8 @@ def download_and_delete_video(
         return
 
     written_length = downloaded_byte_count
-    if not dry:
-        written_length = Path(f"{CONFIG.output_path}{video.filename}").stat().st_size
+    if download:
+        written_length = Path(video_output_filepath).stat().st_size
 
     written_length_diff = downloaded_byte_count - written_length
     if written_length_diff:
@@ -139,5 +137,5 @@ def download_and_delete_video(
 
         return
 
-    if delete and not dry:
+    if delete:
         httpx.get(CONFIG.questdrive_url + "delete/" + video.filepath)

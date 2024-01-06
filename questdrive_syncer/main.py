@@ -21,9 +21,6 @@ from .parsers import parse_video_list_html
 @lock(mode="fail")
 def main() -> None:
     """Perform all actions."""
-    if CONFIG.dry:
-        print("Dry run enabled, no actions will be performed.")
-
     if CONFIG.wait_for_questdrive:
         while not is_online():
             print(f'Waiting for QuestDrive at "{CONFIG.questdrive_url}"...')
@@ -50,7 +47,6 @@ def main() -> None:
 
     download_and_delete_videos(
         videos,
-        dry=CONFIG.dry,
         delete=CONFIG.delete_videos,
         download=CONFIG.download_videos,
     )

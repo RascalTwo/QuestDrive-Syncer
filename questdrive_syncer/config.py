@@ -1,5 +1,6 @@
 """Configuration for QuestDrive Syncer."""
 import argparse
+import time
 from dataclasses import dataclass
 
 
@@ -11,7 +12,6 @@ class Config:
     output_path: str = "output/"
     minimum_free_space_mb: float = 1024
     wait_for_questdrive: bool = False
-    dry: bool = False
     run_while_actively_recording: bool = True
     delete_videos: bool = True
     download_videos: bool = True
@@ -73,12 +73,6 @@ def parse_args(*args: str) -> Config:
         help="Instead of failing if QuestDrive is not found, wait for it to come online",
     )
     parser.add_argument(
-        "--dry",
-        action="store_true",
-        default=default_config.dry,
-        help="Perform no actions, just log what would be done",
-    )
-    parser.add_argument(
         "--dont-run-while-actively-recording",
         action="store_false",
         default=default_config.run_while_actively_recording,
@@ -100,7 +94,15 @@ def parse_args(*args: str) -> Config:
         dest="download_videos",
     )
 
-    return Config(**vars(parser.parse_args(args)))
+    config = Config(**vars(parser.parse_args(args)))
+
+    if config.delete_videos and not config.download_videos:
+        print(
+            "Current configuration will delete videos without downloading.\nIf this is really what you want, simply wait 15 seconds and the program will continue.",
+        )
+        time.sleep(15)
+
+    return config
 
 
 def init_config(*args: str) -> None:
