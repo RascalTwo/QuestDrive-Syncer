@@ -5,7 +5,6 @@ import time
 from questdrive_syncer.config import init_config
 
 from .api import (
-    download_and_delete_videos,
     fetch_video_list_html,
     is_online,
     update_actively_recording,
@@ -16,6 +15,7 @@ from .constants import (
     FAILURE_EXIT_CODE,
     QUESTDRIVE_POLL_RATE_MINUTES,
 )
+from .download import download_and_delete_videos
 from .parsers import parse_video_list_html
 
 

@@ -1,10 +1,21 @@
 """Tests for the config module."""
+from typing import Generator
+
 import pytest
 from pytest_mock import MockerFixture
 
-from .config import CONFIG, init_config, parse_args
+from .config import CONFIG, Config, init_config, parse_args
 
 
+@pytest.fixture()
+def _reset_config() -> Generator[None, None, None]:
+    """Reset the global configuration."""
+    old_config = Config(**CONFIG.__dict__)
+    yield
+    CONFIG.__dict__.update(old_config.__dict__)
+
+
+@pytest.mark.usefixtures("_reset_config")
 def test_init_config_updates_global_config(mocker: MockerFixture) -> None:
     """init_config() updates the global configuration."""
     assert CONFIG.questdrive_url == "https://example.com/"
