@@ -5,7 +5,7 @@ import time
 from questdrive_syncer.config import init_config
 
 from .api import (
-    download_and_delete_video,
+    download_and_delete_videos,
     fetch_video_list_html,
     is_online,
     update_actively_recording,
@@ -16,7 +16,6 @@ from .constants import (
     FAILURE_EXIT_CODE,
     QUESTDRIVE_POLL_RATE_MINUTES,
 )
-from .helpers import has_enough_free_space
 from .parsers import parse_video_list_html
 
 
@@ -51,15 +50,9 @@ def main() -> None:
         print("Quest is actively recording, exiting.")
         sys.exit(ACTIVELY_RECORDING_EXIT_CODE)
 
-    for video in videos:
-        if has_enough_free_space(video.mb_size):
-            download_and_delete_video(
-                video,
-                dry=CONFIG.dry,
-                delete=CONFIG.delete_videos,
-                download=CONFIG.download_videos,
-            )
-        else:
-            print(
-                f'Skipping download of "{video.filename}" because there is not enough free space',
-            )
+    download_and_delete_videos(
+        videos,
+        dry=CONFIG.dry,
+        delete=CONFIG.delete_videos,
+        download=CONFIG.download_videos,
+    )

@@ -23,7 +23,6 @@ def make_main_mocks(
     is_online: bool | list[bool] = True,
     fetch_video_list_html: tuple[str, str] = ("url", "html"),
     parse_video_list_html: None | list[Video] = None,
-    has_enough_free_space: bool = True,
     args: tuple[str, ...] = (),
 ) -> Any:  # noqa: ANN401
     """Create mocks for main()."""
@@ -45,13 +44,9 @@ def make_main_mocks(
     mock_update_actively_recording = mocker.patch(
         "questdrive_syncer.main.update_actively_recording",
     )
-    mock_has_enough_free_space = mocker.patch(
-        "questdrive_syncer.main.has_enough_free_space",
-        return_value=has_enough_free_space,
-    )
 
-    mock_download_and_delete_video = mocker.patch(
-        "questdrive_syncer.main.download_and_delete_video",
+    mock_download_and_delete_videos = mocker.patch(
+        "questdrive_syncer.main.download_and_delete_videos",
     )
 
     if not desired:
@@ -65,8 +60,7 @@ def make_main_mocks(
             "mock_fetch_video_list_html": mock_fetch_video_list_html,
             "mock_parse_video_list_html": mock_parse_video_list_html,
             "mock_update_actively_recording": mock_update_actively_recording,
-            "mock_has_enough_free_space": mock_has_enough_free_space,
-            "mock_download_and_delete_video": mock_download_and_delete_video,
+            "mock_download_and_delete_videos": mock_download_and_delete_videos,
         },
     )
 
@@ -182,10 +176,10 @@ def test_dont_continue_if_actively_recording_and_configured(
     """main() doesn't continue if the Quest is actively recording when the configuration is set accordingly."""
     active_video = dataclasses.replace(video)
     active_video.actively_recording = True
-    mock_print, mock_has_enough_free_space = make_main_mocks(
+    mock_print, mock_download_and_delete_videos = make_main_mocks(
         mocker,
         "mock_print",
-        "mock_has_enough_free_space",
+        "mock_download_and_delete_videos",
         parse_video_list_html=[active_video],
         args=("--dont-run-while-actively-recording",),
     )
@@ -197,55 +191,25 @@ def test_dont_continue_if_actively_recording_and_configured(
     mock_print.assert_called_with(
         "Quest is actively recording, exiting.",
     )
-    mock_has_enough_free_space.assert_not_called()
+    mock_download_and_delete_videos.assert_not_called()
 
 
 def test_prints_and_downloads_each_video_from_smallest_to_largest(
     mocker: MockerFixture,
 ) -> None:
     """main() prints and downloads each video from smallest to largest."""
-    mock_print, mock_download_and_delete_video = make_main_mocks(
+    mock_print, mock_download_and_delete_videos = make_main_mocks(
         mocker,
         "mock_print",
-        "mock_download_and_delete_video",
+        "mock_download_and_delete_videos",
         parse_video_list_html=[video, second_video],
     )
 
     main()
 
-    mock_download_and_delete_video.assert_any_call(
-        video,
+    mock_download_and_delete_videos.assert_called_with(
+        [video, second_video],
         dry=False,
         delete=True,
         download=True,
     )
-    mock_download_and_delete_video.assert_called_with(
-        second_video,
-        dry=False,
-        delete=True,
-        download=True,
-    )
-
-
-def test_doesnt_call_download_video_if_not_enough_space(mocker: MockerFixture) -> None:
-    """main() doesn't call for the downloading & deleting of a video if there is not enough space."""
-    (
-        mock_print,
-        mock_has_enough_free_space,
-        mock_download_and_delete_video,
-    ) = make_main_mocks(
-        mocker,
-        "mock_print",
-        "mock_has_enough_free_space",
-        "mock_download_and_delete_video",
-        parse_video_list_html=[video],
-        has_enough_free_space=False,
-    )
-
-    main()
-
-    mock_print.assert_called_with(
-        'Skipping download of "filename" because there is not enough free space',
-    )
-
-    mock_download_and_delete_video.assert_not_called()
