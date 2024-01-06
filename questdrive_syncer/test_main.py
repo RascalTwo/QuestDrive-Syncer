@@ -2,13 +2,13 @@
 from __future__ import annotations
 
 import dataclasses
-import sys
 from datetime import datetime
 from operator import itemgetter
 from typing import TYPE_CHECKING, Any
 
 import pytest
 
+from .config import init_config
 from .constants import ACTIVELY_RECORDING_EXIT_CODE, FAILURE_EXIT_CODE
 from .main import main
 from .structures import Video
@@ -26,7 +26,7 @@ def make_main_mocks(
     args: tuple[str, ...] = (),
 ) -> Any:  # noqa: ANN401
     """Create mocks for main()."""
-    sys.argv = ["", "--questdrive-url=url", *args]
+    init_config("--questdrive-url=url", *args)
     mock_print = mocker.patch("builtins.print")
     mock_is_online = mocker.patch(
         "questdrive_syncer.main.is_online",

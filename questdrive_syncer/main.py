@@ -2,8 +2,6 @@
 import sys
 import time
 
-from questdrive_syncer.config import init_config
-
 from .api import (
     fetch_video_list_html,
     is_online,
@@ -16,13 +14,13 @@ from .constants import (
     QUESTDRIVE_POLL_RATE_MINUTES,
 )
 from .download import download_and_delete_videos
+from .helpers import lock
 from .parsers import parse_video_list_html
 
 
+@lock(mode="fail")
 def main() -> None:
     """Perform all actions."""
-    init_config(*sys.argv[1:])
-
     if CONFIG.dry:
         print("Dry run enabled, no actions will be performed.")
 
