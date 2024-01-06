@@ -52,7 +52,6 @@ def main() -> None:
         sys.exit(ACTIVELY_RECORDING_EXIT_CODE)
 
     for video in videos:
-        print(video)
         if has_enough_free_space(video.mb_size):
             download_and_delete_video(
                 video,

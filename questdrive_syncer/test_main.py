@@ -213,8 +213,6 @@ def test_prints_and_downloads_each_video_from_smallest_to_largest(
 
     main()
 
-    mock_print.assert_any_call(video)
-    mock_print.assert_called_with(second_video)
     mock_download_and_delete_video.assert_any_call(
         video,
         dry=False,

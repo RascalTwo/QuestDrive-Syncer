@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 
 import httpx
+import rich.progress
 
 from .config import CONFIG
 from .constants import (
@@ -63,12 +64,29 @@ def download_and_delete_video(
     expected_byte_count = int(head_response.headers.get("Content-Length", 0))
     downloaded_byte_count = expected_byte_count
     if download and not dry:
-        response = httpx.get(url)
-        expected_byte_count = int(response.headers.get("Content-Length", 0))
-        downloaded_byte_count = len(response.content)
+        with httpx.stream("GET", url) as response, rich.progress.Progress(
+            rich.progress.TextColumn(
+                "[bold blue]{task.fields[filename]}",
+                justify="right",
+            ),
+            "[progress.percentage]{task.percentage:>3.0f}%",
+            rich.progress.BarColumn(bar_width=None),
+            rich.progress.DownloadColumn(),
+            rich.progress.TransferSpeedColumn(),
+            rich.progress.TimeRemainingColumn(),
+        ) as progress, Path(f"{CONFIG.output_path}{video.filename}").open("wb") as file:
+            expected_byte_count = int(response.headers.get("Content-Length", 0))
+            downloaded_byte_count = 0
+            download_task = progress.add_task(
+                "Download",
+                total=expected_byte_count,
+                filename=video.filename,
+            )
+            for chunk in response.iter_bytes():
+                file.write(chunk)
+                progress.update(download_task, completed=response.num_bytes_downloaded)
+                downloaded_byte_count += len(chunk)
 
-        with Path(f"{CONFIG.output_path}{video.filename}").open("wb") as f:
-            f.write(response.content)
         os.utime(
             f"{CONFIG.output_path}{video.filename}",
             (video.created_at.timestamp(), video.modified_at.timestamp()),
