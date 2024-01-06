@@ -25,7 +25,7 @@ def parse_video_list_html(from_url: str, html: str) -> list[Video]:
         filepath = raw_cells[3].split("href='/download/")[1].split("'")[0]
 
         raw_size, size_unit = raw_cells[2].split(" ")
-        mb_size = float(raw_size) * (1000 if size_unit == "GB" else 1)
+        mb_size = float(raw_size) * (1000 if size_unit == "GB" else 1) * 1.048576
 
         videos.append(
             Video(

@@ -17,7 +17,7 @@ class Video:
 
     def __str__(self: "Video") -> str:
         """Return a string representation of the video."""
-        string = f"{self.filename} at {self.mb_size} MB - {self.created_at} -> {self.modified_at}"
+        string = f"{self.filename} at {round(self.mb_size, 2):,} MB - {self.created_at} -> {self.modified_at}"
         if self.actively_recording:
             string += " (actively recording)"
         return string
