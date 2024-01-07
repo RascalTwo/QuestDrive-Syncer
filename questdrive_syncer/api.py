@@ -27,6 +27,11 @@ def fetch_video_list_html() -> tuple[str, str]:
     return url, response.text
 
 
+def fetch_homepage_html() -> str:
+    """Fetch the URL and HTML of the video list."""
+    return httpx.get(CONFIG.questdrive_url).text
+
+
 def update_actively_recording(videos: list[Video], latest_videos: list[Video]) -> None:
     """Update the actively_recording attribute of the videos if the modified_at has changed."""
     for video in videos:

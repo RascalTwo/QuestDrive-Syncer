@@ -168,6 +168,38 @@ def test_parse_args_provided_dont_download(
     assert config.download_videos is False
 
 
+def test_parse_args_default_only_run_if_space_less(
+    mocker: MockerFixture,
+) -> None:
+    """parse_args() returns None for only_run_if_space_less by default."""
+    config = parse_args("--questdrive-url=url")
+
+    assert config.only_run_if_space_less == float("inf")
+
+
+def test_parse_args_custom_only_run_if_space_less(
+    mocker: MockerFixture,
+) -> None:
+    """parse_args() returns the provided only_run_if_space_less."""
+    config = parse_args("--questdrive-url=url", "--only-run-if-space-less=1")
+
+    assert config.only_run_if_space_less == 1
+
+
+def test_parse_args_only_run_if_space_less_must_be_greater_then_0(
+    mocker: MockerFixture,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """parse_args() prints an error message if --only-run-if-space-less is less than 0."""
+    with pytest.raises(SystemExit):
+        parse_args("--questdrive-url=url", "--only-run-if-space-less=-1")
+
+    assert (
+        "argument --only-run-if-space-less: can't be less then 0"
+        in capsys.readouterr().err
+    )
+
+
 def test_parse_args_default_minimum_free_space(mocker: MockerFixture) -> None:
     """parse_args() returns the default minimum_free_space_mb."""
     config = parse_args("--questdrive-url=url")

@@ -8,6 +8,7 @@ import httpx
 import pytest
 
 from .api import (
+    fetch_homepage_html,
     fetch_video_list_html,
     is_online,
     update_actively_recording,
@@ -45,10 +46,20 @@ def test_non_200(httpx_mock: HTTPXMock) -> None:
 def test_fetch_video_list_html(httpx_mock: HTTPXMock) -> None:
     """fetch_video_list_html() returns the URL & HTML."""
     httpx_mock.add_response(text="html")
+
     assert fetch_video_list_html() == (
         "https://example.com/list/storage/emulated/0/Oculus/VideoShots/",
         "html",
     )
+
+
+def test_fetch_homepage_html(httpx_mock: HTTPXMock) -> None:
+    """fetch_homepage_html() calls the correct URL & returns the HTML."""
+    httpx_mock.add_response(text="html")
+
+    assert fetch_homepage_html() == "html"
+
+    assert httpx_mock.get_requests()[0].url == "https://example.com/"
 
 
 def test_update_actively_recording_handles_unchanged() -> None:

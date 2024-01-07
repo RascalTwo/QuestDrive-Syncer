@@ -1,4 +1,6 @@
 """Configuration for QuestDrive Syncer."""
+from __future__ import annotations
+
 import argparse
 import sys
 import time
@@ -20,6 +22,7 @@ class Config:
     delete_videos: bool = True
     download_videos: bool = True
     simple_output: bool = False
+    only_run_if_space_less: float = float("inf")
 
 
 CONFIG = Config(questdrive_url="https://example.com/")
@@ -116,6 +119,12 @@ def parse_args(*args: str) -> Config:
         action="store_true",
         default=sys.stdout.isatty(),
         help="Print simple output instead of a progress bar",
+    )
+    parser.add_argument(
+        "--only-run-if-space-less",
+        type=float_gte_zero,
+        default=default_config.only_run_if_space_less,
+        help="Only run if QuestDrive reports less than this amount of free space in MB",
     )
 
     config = Config(**vars(parser.parse_args(args)))

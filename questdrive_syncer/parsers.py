@@ -6,6 +6,18 @@ from datetime import datetime
 from .structures import Video
 
 
+def raw_size_to_mb(raw_size: str, unit: str) -> float:
+    """Convert a raw size & unit to MB."""
+    return float(raw_size) * (1000 if unit == "GB" else 1) * 1.048576
+
+
+def parse_homepage_html(html: str) -> float:
+    """Parse the battery percentage & free space from the homepage HTML."""
+    return raw_size_to_mb(
+        *html.split("Free Space:")[1].split(">")[1].split("<")[0].split(" "),
+    )
+
+
 def parse_video_list_html(from_url: str, html: str) -> list[Video]:
     """Parse the video list HTML into a list of videos."""
     table_html = html.split("<tbody>")[1].split("</tbody>")[0]
@@ -24,8 +36,7 @@ def parse_video_list_html(from_url: str, html: str) -> list[Video]:
         modified_at = datetime.strptime(raw_cells[1], "%m/%d/%Y %H:%M:%S")
         filepath = raw_cells[3].split("href='/download/")[1].split("'")[0]
 
-        raw_size, size_unit = raw_cells[2].split(" ")
-        mb_size = float(raw_size) * (1000 if size_unit == "GB" else 1) * 1.048576
+        mb_size = raw_size_to_mb(*raw_cells[2].split(" "))
 
         videos.append(
             Video(

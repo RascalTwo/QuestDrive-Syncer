@@ -9,7 +9,11 @@ from typing import TYPE_CHECKING, Any
 import pytest
 
 from .config import init_config
-from .constants import ACTIVELY_RECORDING_EXIT_CODE, FAILURE_EXIT_CODE
+from .constants import (
+    ACTIVELY_RECORDING_EXIT_CODE,
+    FAILURE_EXIT_CODE,
+    TOO_MUCH_SPACE_EXIT_CODE,
+)
 from .main import main
 from .structures import Video
 
@@ -23,14 +27,24 @@ def make_main_mocks(
     is_online: bool | list[bool] = True,
     fetch_video_list_html: tuple[str, str] = ("url", "html"),
     parse_video_list_html: None | list[Video] = None,
+    fetch_homepage_html: str = "html",
+    parse_homepage_html: int = 1000,
     args: tuple[str, ...] = (),
 ) -> Any:  # noqa: ANN401
     """Create mocks for main()."""
-    init_config("--questdrive-url=url", *args)
+    init_config("--questdrive-url=url", "--simple-output", *args)
     mock_print = mocker.patch("builtins.print")
     mock_is_online = mocker.patch(
         "questdrive_syncer.main.is_online",
         side_effect=is_online if isinstance(is_online, list) else [is_online],
+    )
+    mock_fetch_homepage_html = mocker.patch(
+        "questdrive_syncer.main.fetch_homepage_html",
+        return_value=fetch_homepage_html,
+    )
+    mock_parse_homepage_html = mocker.patch(
+        "questdrive_syncer.main.parse_homepage_html",
+        return_value=parse_homepage_html,
     )
     mock_sleep = mocker.patch("time.sleep")
     mock_fetch_video_list_html = mocker.patch(
@@ -57,6 +71,8 @@ def make_main_mocks(
             "mock_is_online": mock_is_online,
             "mock_sleep": mock_sleep,
             "mock_print": mock_print,
+            "mock_fetch_homepage_html": mock_fetch_homepage_html,
+            "mock_parse_homepage_html": mock_parse_homepage_html,
             "mock_fetch_video_list_html": mock_fetch_video_list_html,
             "mock_parse_video_list_html": mock_parse_video_list_html,
             "mock_update_actively_recording": mock_update_actively_recording,
@@ -105,6 +121,27 @@ def test_waits_for_questdrive_if_wait_for_questdrive(mocker: MockerFixture) -> N
     )
     assert mock_is_online.call_count == 2  # noqa: PLR2004
     mock_sleep.assert_any_call(5 * 60)
+
+
+def test_exits_if_too_much_free_space(mocker: MockerFixture) -> None:
+    """main() exits if there is too much free space."""
+    mock_print, mock_fetch_homepage_html, mock_parse_homepage_html = make_main_mocks(
+        mocker,
+        "mock_print",
+        "mock_fetch_homepage_html",
+        "mock_parse_homepage_html",
+        args=("--only-run-if-space-less=500",),
+    )
+
+    with pytest.raises(SystemExit) as exc_info:
+        main()
+
+    assert exc_info.value.code == TOO_MUCH_SPACE_EXIT_CODE
+    mock_fetch_homepage_html.assert_called_once_with()
+    mock_parse_homepage_html.assert_called_once_with("html")
+    mock_print.assert_any_call(
+        "QuestDrive reports 1,000 MB free space, which is more than the configured limit of 500.0 MB. Exiting.",
+    )
 
 
 video = Video("filepath", "filename", datetime.now(), datetime.now(), 1.23, "url")
@@ -202,5 +239,5 @@ def test_prints_and_downloads_each_video_from_smallest_to_largest(
         [video, second_video],
         delete=True,
         download=True,
-        simple_output=False,
+        simple_output=True,
     )

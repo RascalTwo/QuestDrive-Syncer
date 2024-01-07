@@ -2,11 +2,46 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 import pytest
 
-from .parsers import parse_video_list_html
+from .parsers import parse_homepage_html, parse_video_list_html, raw_size_to_mb
 from .structures import Video
+
+if TYPE_CHECKING:  # pragma: no cover
+    from pytest_mock import MockerFixture
+
+
+@pytest.mark.parametrize(
+    ("raw_size", "unit", "expected"),
+    [
+        ("2.345", "MB", 2.45891072),
+        ("2.345", "GB", 2458.91072),
+    ],
+)
+def test_raw_size_to_mb(raw_size: str, unit: str, expected: float) -> None:
+    """raw_size_to_mb function returns the expected value."""
+    assert raw_size_to_mb(raw_size, unit) == expected
+
+
+def test_parse_homepage_html(mocker: MockerFixture) -> None:
+    """parse_homepage_html function calls raw_size_to_mb with expected values."""
+    mock_raw_size_to_mb = mocker.patch(
+        "questdrive_syncer.parsers.raw_size_to_mb",
+        return_value=1,
+    )
+    assert (
+        parse_homepage_html(
+            """
+    Free Space:
+    <b>2.345 GB</b>
+    """,
+        )
+        == 1
+    )
+    mock_raw_size_to_mb.assert_called_once_with("2.345", "GB")
+
 
 html_expected_mappings = {
     "normal": [

@@ -7,7 +7,7 @@ authors = ["Rascal_Two <therealrascaltwo@gmail.com>"]
 description = ""
 name = "questdrive-syncer"
 readme = "README.md"
-version = "2.1.2"
+version = "2.2.0"
 
 [tool.poetry.dependencies]
 httpx = "^0.26.0"

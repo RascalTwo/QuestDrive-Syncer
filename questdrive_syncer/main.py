@@ -3,6 +3,7 @@ import sys
 import time
 
 from .api import (
+    fetch_homepage_html,
     fetch_video_list_html,
     is_online,
     update_actively_recording,
@@ -12,10 +13,11 @@ from .constants import (
     ACTIVELY_RECORDING_EXIT_CODE,
     FAILURE_EXIT_CODE,
     QUESTDRIVE_POLL_RATE_MINUTES,
+    TOO_MUCH_SPACE_EXIT_CODE,
 )
 from .download import download_and_delete_videos
 from .helpers import lock
-from .parsers import parse_video_list_html
+from .parsers import parse_homepage_html, parse_video_list_html
 
 
 @lock(mode="fail")
@@ -30,6 +32,15 @@ def main() -> None:
         sys.exit(FAILURE_EXIT_CODE)
 
     print(f'QuestDrive found running at "{CONFIG.questdrive_url}"')
+
+    if CONFIG.only_run_if_space_less != float("inf"):
+        html = fetch_homepage_html()
+        free_space = parse_homepage_html(html)
+        if free_space > CONFIG.only_run_if_space_less:
+            print(
+                f"QuestDrive reports {free_space:,} MB free space, which is more than the configured limit of {CONFIG.only_run_if_space_less:,} MB. Exiting.",
+            )
+            sys.exit(TOO_MUCH_SPACE_EXIT_CODE)
 
     videos = parse_video_list_html(*fetch_video_list_html())
     time.sleep(1)
