@@ -49,4 +49,5 @@ def main() -> None:
         videos,
         delete=CONFIG.delete_videos,
         download=CONFIG.download_videos,
+        simple_output=CONFIG.simple_output,
     )

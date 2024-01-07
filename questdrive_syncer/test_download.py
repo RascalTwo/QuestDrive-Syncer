@@ -417,6 +417,31 @@ videos = [
 ]
 
 
+def test_download_and_delete_videos_simple_output(mocker: MockerFixture) -> None:
+    """download_and_delete_videos() prints simple output if simple_output is True."""
+    mock_print, mock_download_and_delete_video = make_download_and_delete_videos_mocks(
+        mocker,
+        len(videos),
+        "mock_print",
+        "mock_download_and_delete_video",
+        has_enough_free_space=True,
+        download_and_delete_video=[["bad thing happened"], [90000000, 110000000]],
+    )
+
+    download_and_delete_videos(videos, simple_output=True)
+
+    for video in videos:
+        mock_print.assert_any_call("Starting", video, "...")
+        mock_download_and_delete_video.assert_any_call(
+            video,
+            delete=True,
+            download=True,
+        )
+        mock_print.assert_any_call("Finished", video)
+
+    mock_print.assert_any_call("bad thing happened")
+
+
 def test_download_and_delete_videos_creates_initial_tasks(
     mocker: MockerFixture,
 ) -> None:

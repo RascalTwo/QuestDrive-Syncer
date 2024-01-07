@@ -1,5 +1,6 @@
 """Configuration for QuestDrive Syncer."""
 import argparse
+import sys
 import time
 from dataclasses import dataclass
 
@@ -15,6 +16,7 @@ class Config:
     run_while_actively_recording: bool = True
     delete_videos: bool = True
     download_videos: bool = True
+    simple_output: bool = False
 
 
 CONFIG = Config(questdrive_url="https://example.com/")
@@ -92,6 +94,12 @@ def parse_args(*args: str) -> Config:
         default=default_config.download_videos,
         help="Don't download videos from the Quest",
         dest="download_videos",
+    )
+    parser.add_argument(
+        "--simple-output",
+        action="store_true",
+        default=sys.stdout.isatty(),
+        help="Print simple output instead of a progress bar",
     )
 
     config = Config(**vars(parser.parse_args(args)))

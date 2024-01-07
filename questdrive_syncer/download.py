@@ -18,10 +18,24 @@ if TYPE_CHECKING:  # pragma: no cover
 def download_and_delete_videos(
     videos: list[Video],
     *,
+    simple_output: bool = False,
     delete: bool = True,
     download: bool = True,
 ) -> None:
     """Download and delete the videos."""
+    if simple_output:
+        for video in videos:
+            print("Starting", video, "...")
+            for value in download_and_delete_video(
+                video,
+                delete=delete,
+                download=download,
+            ):
+                if isinstance(value, str):
+                    print(value)
+            print("Finished", video)
+        return
+
     sizes = [video.mb_size * 1000**2 for video in videos]
     total_size = sum(sizes)
     with rich.progress.Progress(

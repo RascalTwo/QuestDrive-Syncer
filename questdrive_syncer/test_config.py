@@ -107,6 +107,26 @@ def test_parse_args_provided_dont_delete(
     assert config.delete_videos is False
 
 
+def test_parse_args_default_simple_output(
+    mocker: MockerFixture,
+) -> None:
+    """parse_args() returns the TTY state for --simple-output by default."""
+    for value in (True, False):
+        mocker.patch("sys.stdout.isatty", return_value=value)
+        config = parse_args("--questdrive-url=url")
+
+        assert config.simple_output is value
+
+
+def test_parse_args_provided_simple_output(
+    mocker: MockerFixture,
+) -> None:
+    """parse_args() returns True if --simple-output is provided."""
+    config = parse_args("--questdrive-url=url", "--simple-output")
+
+    assert config.simple_output is True
+
+
 def test_parse_args_default_dont_download(
     mocker: MockerFixture,
 ) -> None:

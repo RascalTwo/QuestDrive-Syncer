@@ -202,4 +202,5 @@ def test_prints_and_downloads_each_video_from_smallest_to_largest(
         [video, second_video],
         delete=True,
         download=True,
+        simple_output=False,
     )
