@@ -23,6 +23,7 @@ class Config:
     download_videos: bool = True
     simple_output: bool = False
     only_run_if_space_less: float = float("inf")
+    only_run_if_battery_above: int = 0
 
 
 CONFIG = Config(questdrive_url="https://example.com/")
@@ -44,6 +45,17 @@ def str_with_trailing_forward_slash(value: str) -> str:
     if not value.endswith("/"):
         value += "/"
     return value
+
+
+def percentage(value: str) -> int:
+    """Return a int between 0 and 100."""
+    int_value = int(value)
+    if int_value < 0 or int_value > 100:  # noqa: PLR2004
+        message = "must be between 0 and 100"
+        raise argparse.ArgumentTypeError(
+            message,
+        )
+    return int_value
 
 
 def parse_args(*args: str) -> Config:
@@ -125,6 +137,12 @@ def parse_args(*args: str) -> Config:
         type=float_gte_zero,
         default=default_config.only_run_if_space_less,
         help="Only run if QuestDrive reports less than this amount of free space in MB",
+    )
+    parser.add_argument(
+        "--only-run-if-battery-above",
+        type=percentage,
+        default=default_config.only_run_if_battery_above,
+        help="Only run if QuestDrive reports a battery percentage above this value",
     )
 
     config = Config(**vars(parser.parse_args(args)))

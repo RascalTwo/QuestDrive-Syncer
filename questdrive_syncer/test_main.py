@@ -12,6 +12,7 @@ from .config import init_config
 from .constants import (
     ACTIVELY_RECORDING_EXIT_CODE,
     FAILURE_EXIT_CODE,
+    NOT_ENOUGH_BATTERY_EXIT_CODE,
     TOO_MUCH_SPACE_EXIT_CODE,
 )
 from .main import main
@@ -28,7 +29,7 @@ def make_main_mocks(
     fetch_video_list_html: tuple[str, str] = ("url", "html"),
     parse_video_list_html: None | list[Video] = None,
     fetch_homepage_html: str = "html",
-    parse_homepage_html: int = 1000,
+    parse_homepage_html: tuple[int, float] = (50, 1000.0),
     args: tuple[str, ...] = (),
 ) -> Any:  # noqa: ANN401
     """Create mocks for main()."""
@@ -140,7 +141,28 @@ def test_exits_if_too_much_free_space(mocker: MockerFixture) -> None:
     mock_fetch_homepage_html.assert_called_once_with()
     mock_parse_homepage_html.assert_called_once_with("html")
     mock_print.assert_any_call(
-        "QuestDrive reports 1,000 MB free space, which is more than the configured limit of 500.0 MB. Exiting.",
+        "QuestDrive reports 1,000.0 MB free space, which is more than the configured limit of 500.0 MB. Exiting.",
+    )
+
+
+def test_exits_if_not_enough_battery(mocker: MockerFixture) -> None:
+    """main() exits if there is not enough battery charge remaining."""
+    mock_print, mock_fetch_homepage_html, mock_parse_homepage_html = make_main_mocks(
+        mocker,
+        "mock_print",
+        "mock_fetch_homepage_html",
+        "mock_parse_homepage_html",
+        args=("--only-run-if-battery-above=75",),
+    )
+
+    with pytest.raises(SystemExit) as exc_info:
+        main()
+
+    assert exc_info.value.code == NOT_ENOUGH_BATTERY_EXIT_CODE
+    mock_fetch_homepage_html.assert_called_once_with()
+    mock_parse_homepage_html.assert_called_once_with("html")
+    mock_print.assert_any_call(
+        "QuestDrive reports 50% battery remaining, which is less than the configured minimum of 75%. Exiting.",
     )
 
 

@@ -200,6 +200,46 @@ def test_parse_args_only_run_if_space_less_must_be_greater_then_0(
     )
 
 
+def test_parse_args_default_only_run_if_battery_above(
+    mocker: MockerFixture,
+) -> None:
+    """parse_args() returns 0 for only_run_if_battery_above by default."""
+    config = parse_args("--questdrive-url=url")
+
+    assert config.only_run_if_battery_above == 0
+
+
+def test_parse_args_custom_only_run_if_battery_above(
+    mocker: MockerFixture,
+) -> None:
+    """parse_args() returns the provided only_run_if_battery_above."""
+    config = parse_args("--questdrive-url=url", "--only-run-if-battery-above=75")
+
+    assert config.only_run_if_battery_above == 75  # noqa: PLR2004
+
+
+@pytest.mark.parametrize(
+    "percentage",
+    [
+        -1,
+        101,
+    ],
+)
+def test_parse_args_only_run_if_battery_above_must_within_0_100(
+    percentage: int,
+    mocker: MockerFixture,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """parse_args() prints an error message if --only-run-if-battery-above is outside of 0-100 range."""
+    with pytest.raises(SystemExit):
+        parse_args("--questdrive-url=url", f"--only-run-if-battery-above={percentage}")
+
+    assert (
+        "argument --only-run-if-battery-above: must be between 0 and 100"
+        in capsys.readouterr().err
+    )
+
+
 def test_parse_args_default_minimum_free_space(mocker: MockerFixture) -> None:
     """parse_args() returns the default minimum_free_space_mb."""
     config = parse_args("--questdrive-url=url")

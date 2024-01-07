@@ -11,10 +11,13 @@ def raw_size_to_mb(raw_size: str, unit: str) -> float:
     return float(raw_size) * (1000 if unit == "GB" else 1) * 1.048576
 
 
-def parse_homepage_html(html: str) -> float:
+def parse_homepage_html(html: str) -> tuple[int, float]:
     """Parse the battery percentage & free space from the homepage HTML."""
-    return raw_size_to_mb(
-        *html.split("Free Space:")[1].split(">")[1].split("<")[0].split(" "),
+    return (
+        int(html.split("Battery:")[1].split(">")[1].split("<")[0].split("%")[0]),
+        raw_size_to_mb(
+            *html.split("Free Space:")[1].split(">")[1].split("<")[0].split(" "),
+        ),
     )
 
 

@@ -26,20 +26,19 @@ def test_raw_size_to_mb(raw_size: str, unit: str, expected: float) -> None:
 
 
 def test_parse_homepage_html(mocker: MockerFixture) -> None:
-    """parse_homepage_html function calls raw_size_to_mb with expected values."""
+    """parse_homepage_html function parses battery & calls raw_size_to_mb with expected values."""
     mock_raw_size_to_mb = mocker.patch(
         "questdrive_syncer.parsers.raw_size_to_mb",
         return_value=1,
     )
-    assert (
-        parse_homepage_html(
-            """
+    assert parse_homepage_html(
+        """
+    Battery:
+    <b>50%</b>
     Free Space:
     <b>2.345 GB</b>
     """,
-        )
-        == 1
-    )
+    ) == (50, 1)
     mock_raw_size_to_mb.assert_called_once_with("2.345", "GB")
 
 

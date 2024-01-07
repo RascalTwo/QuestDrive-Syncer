@@ -12,6 +12,7 @@ from .config import CONFIG
 from .constants import (
     ACTIVELY_RECORDING_EXIT_CODE,
     FAILURE_EXIT_CODE,
+    NOT_ENOUGH_BATTERY_EXIT_CODE,
     QUESTDRIVE_POLL_RATE_MINUTES,
     TOO_MUCH_SPACE_EXIT_CODE,
 )
@@ -33,14 +34,22 @@ def main() -> None:
 
     print(f'QuestDrive found running at "{CONFIG.questdrive_url}"')
 
-    if CONFIG.only_run_if_space_less != float("inf"):
-        html = fetch_homepage_html()
-        free_space = parse_homepage_html(html)
+    if (
+        CONFIG.only_run_if_space_less != float("inf")
+        or CONFIG.only_run_if_battery_above > 0
+    ):
+        homepage_html = fetch_homepage_html()
+        battery_percentage, free_space = parse_homepage_html(homepage_html)
         if free_space > CONFIG.only_run_if_space_less:
             print(
                 f"QuestDrive reports {free_space:,} MB free space, which is more than the configured limit of {CONFIG.only_run_if_space_less:,} MB. Exiting.",
             )
             sys.exit(TOO_MUCH_SPACE_EXIT_CODE)
+        if battery_percentage < CONFIG.only_run_if_battery_above:
+            print(
+                f"QuestDrive reports {battery_percentage}% battery remaining, which is less than the configured minimum of {CONFIG.only_run_if_battery_above}%. Exiting.",
+            )
+            sys.exit(NOT_ENOUGH_BATTERY_EXIT_CODE)
 
     videos = parse_video_list_html(*fetch_video_list_html())
     time.sleep(1)
