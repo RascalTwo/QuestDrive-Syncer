@@ -1,5 +1,6 @@
 """Tests for the config module."""
 from typing import Generator
+from unittest.mock import mock_open
 
 import pytest
 from pytest_mock import MockerFixture
@@ -23,6 +24,19 @@ def test_init_config_updates_global_config(mocker: MockerFixture) -> None:
     init_config("--questdrive-url=url")
 
     assert CONFIG.questdrive_url == "url/"
+
+
+def test_parse_args_reads_version(
+    mocker: MockerFixture,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """parse_args() returns the version."""
+    mocker.patch("pathlib.Path.open", mock_open(read_data='version = "1.0.0"'))
+    with pytest.raises(SystemExit) as exec_info:
+        parse_args("--version")
+
+    assert exec_info.value.code == 0
+    assert "1.0.0" in capsys.readouterr().out
 
 
 def test_parse_args_default_questdrive_url(

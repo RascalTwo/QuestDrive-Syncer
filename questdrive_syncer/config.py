@@ -3,6 +3,9 @@ import argparse
 import sys
 import time
 from dataclasses import dataclass
+from pathlib import Path
+
+from rich_argparse import HelpPreviewAction, RichHelpFormatter
 
 
 @dataclass
@@ -44,10 +47,23 @@ def parse_args(*args: str) -> Config:
     """Parse the command-line arguments."""
     parser = argparse.ArgumentParser(
         description="Sync your Quest's recordings to your computer via QuestDrive",
+        formatter_class=RichHelpFormatter,
     )
 
     default_config = Config(questdrive_url="")
 
+    parser.add_argument(
+        "--generate-help-preview",
+        action=HelpPreviewAction,
+        path="help-preview.svg",
+    )
+    with (Path(__file__).parent.parent / "pyproject.toml").open("r") as pyproject:
+        version = pyproject.read().split('version = "')[1].split('"')[0]
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"[argparse.prog]%(prog)s[/] version [i]{version}[/]",
+    )
     parser.add_argument(
         "--questdrive-url",
         type=str_with_trailing_forward_slash,
