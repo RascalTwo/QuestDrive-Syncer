@@ -28,7 +28,7 @@ keywords = ["questdrive", "httpx"]
 license = "MIT"
 name = "questdrive-syncer"
 readme = "README.md"
-version = "2.5.0"
+version = "2.5.1"
 
 [tool.poetry.dependencies]
 httpx = "^0.26.0"
