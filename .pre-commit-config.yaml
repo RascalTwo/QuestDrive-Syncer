@@ -167,7 +167,7 @@ repos:
       hooks:
           - id: absolufy-imports
     - repo: https://github.com/hakancelikdev/unimport
-      rev: stable
+      rev: 1.2.1
       hooks:
           - id: unimport
             args:
@@ -211,19 +211,6 @@ repos:
           - id: ruff-format
     - repo: local
       hooks:
-          - id: coverage
-            name: Check coverage
-            description: Ensure all code is covered
-            language: system
-            entry: coverage
-            args:
-                - report
-                - --fail-under=100
-            types:
-                - python
-            pass_filenames: false
-    - repo: local
-      hooks:
           - id: mypy
             name: Check types
             description: This hook runs MyPy with strict settings
@@ -237,8 +224,6 @@ repos:
             types:
                 - python
             pass_filenames: false
-    - repo: local
-      hooks:
           - id: pytest
             name: Check passing tests & TypeGuard usage
             description: This hook runs PyTest with TypeGuard & coverage enabled
@@ -247,6 +232,17 @@ repos:
             args:
                 - run
                 - pytest
+            types:
+                - python
+            pass_filenames: false
+          - id: coverage
+            name: Check coverage
+            description: Ensure all code is covered
+            language: system
+            entry: coverage
+            args:
+                - report
+                - --fail-under=100
             types:
                 - python
             pass_filenames: false

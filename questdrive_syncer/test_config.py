@@ -1,6 +1,5 @@
 """Tests for the config module."""
 from typing import Generator
-from unittest.mock import mock_open
 
 import pytest
 from pytest_mock import MockerFixture
@@ -31,12 +30,13 @@ def test_parse_args_reads_version(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     """parse_args() returns the version."""
-    mocker.patch("pathlib.Path.open", mock_open(read_data='version = "1.0.0"'))
+    mock_version = mocker.patch("importlib.metadata.version", return_value="1.0.0")
     with pytest.raises(SystemExit) as exec_info:
         parse_args("--version")
 
     assert exec_info.value.code == 0
     assert "1.0.0" in capsys.readouterr().out
+    mock_version.assert_called_once_with("questdrive-syncer")
 
 
 def test_parse_args_default_questdrive_url(

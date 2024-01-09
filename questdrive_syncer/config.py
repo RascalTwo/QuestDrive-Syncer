@@ -2,10 +2,10 @@
 from __future__ import annotations
 
 import argparse
+import importlib.metadata
 import sys
 import time
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Literal
 
 from rich_argparse import HelpPreviewAction, RichHelpFormatter
@@ -75,12 +75,10 @@ def parse_args(*args: str) -> Config:
         action=HelpPreviewAction,
         path="help-preview.svg",
     )
-    with (Path(__file__).parent.parent / "pyproject.toml").open("r") as pyproject:
-        version = pyproject.read().split('version = "')[1].split('"')[0]
     parser.add_argument(
         "--version",
         action="version",
-        version=f"[argparse.prog]%(prog)s[/] version [i]{version}[/]",
+        version=f"[argparse.prog]%(prog)s[/] version [i]{importlib.metadata.version('questdrive-syncer')}[/]",
     )
     parser.add_argument(
         "--questdrive-url",
