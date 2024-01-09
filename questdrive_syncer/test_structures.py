@@ -32,3 +32,28 @@ def test_video_string_includes_actively_recording() -> None:
             actively_recording=True,
         ),
     )
+
+
+def test_video_application_name() -> None:
+    """Application name of a Video is correct."""
+    assert (
+        Video(
+            "full%2Fpathtofile.mp4",
+            "filename-20240101-111213.mp4",
+            datetime(2024, 1, 1, 11, 12, 13),
+            datetime(2024, 1, 1, 12, 13, 14),
+            2345 * 1.048576,
+        ).application_name
+        == "filename"
+    )
+
+
+def test_video_duration() -> None:
+    """Duration of a Video is correct."""
+    assert Video(
+        "full%2Fpathtofile.mp4",
+        "filename-20240101-111213.mp4",
+        datetime(2024, 1, 1, 11, 12, 13),
+        datetime(2024, 1, 1, 12, 13, 14),
+        2345 * 1.048576,
+    ).duration == datetime(2024, 1, 1, 12, 13, 14) - datetime(2024, 1, 1, 11, 12, 13)

@@ -1,6 +1,6 @@
 """Common structures."""
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 @dataclass
@@ -20,6 +20,16 @@ class Video:
         if self.actively_recording:
             string += " (actively recording)"
         return string
+
+    @property
+    def duration(self: "Video") -> timedelta:
+        """Return the duration of the video as a timedelta."""
+        return self.modified_at - self.created_at
+
+    @property
+    def application_name(self: "Video") -> str:
+        """Return the application name of the video."""
+        return self.filename.split("-")[0]
 
 
 class MissingVideoError(Exception):

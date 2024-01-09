@@ -226,7 +226,14 @@ def test_parse_args_sort_by_default() -> None:
 
 @pytest.mark.parametrize(
     "sort_by",
-    ["filename", "created_at", "modified_at", "mb_size"],
+    [
+        "filename",
+        "created_at",
+        "modified_at",
+        "mb_size",
+        "application_name",
+        "duration",
+    ],
 )
 def test_parse_args_custom_sort_by(sort_by: str) -> None:
     """parse_args() returns the provided sort_by."""
@@ -242,10 +249,7 @@ def test_parse_args_sort_by_must_be_valid(
     with pytest.raises(SystemExit):
         parse_args("--questdrive-url=url", "--sort-by=invalid")
 
-    assert (
-        "argument --sort-by: invalid choice: 'invalid' (choose from 'filename', 'created_at', 'modified_at', 'mb_size')"
-        in capsys.readouterr().err
-    )
+    assert "argument --sort-by: invalid choice: 'invalid'" in capsys.readouterr().err
 
 
 def test_parse_args_sort_order_default() -> None:

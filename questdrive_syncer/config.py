@@ -25,7 +25,14 @@ class Config:
     simple_output: bool = False
     only_run_if_space_less: float = float("inf")
     only_run_if_battery_above: int = 0
-    sort_by: Literal["mb_size" | "filename" | "created_at" | "modified_at"] = "mb_size"
+    sort_by: Literal[
+        "mb_size"
+        | "filename"
+        | "created_at"
+        | "modified_at"
+        | "application_name"
+        | "duration"
+    ] = "mb_size"
     sort_order: Literal["ascending" | "descending"] = "ascending"
 
 
@@ -147,7 +154,14 @@ def parse_args(*args: str) -> Config:
     )
     parser.add_argument(
         "--sort-by",
-        choices=["filename", "created_at", "modified_at", "mb_size"],
+        choices=[
+            "filename",
+            "created_at",
+            "modified_at",
+            "mb_size",
+            "application_name",
+            "duration",
+        ],
         default=default_config.sort_by,
         help="Video attribute to sort by",
     )
