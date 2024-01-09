@@ -1,89 +1,303 @@
 ---
 fail_fast: true
-
 repos:
     - repo: https://github.com/pre-commit/pre-commit-hooks
-      rev: v3.2.0
+      rev: v4.5.0
+      hooks:
+          - id: end-of-file-fixer
+    - repo: https://github.com/sirosen/texthooks
+      rev: 0.6.3
+      hooks:
+          - id: fix-smartquotes
+          - id: fix-ligatures
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.5.0
+      hooks:
+          - id: fix-byte-order-marker
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.5.0
+      hooks:
+          - id: check-symlinks
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.5.0
+      hooks:
+          - id: check-added-large-files
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.5.0
       hooks:
           - id: trailing-whitespace
-          - id: end-of-file-fixer
-          - id: check-toml
-          - id: check-yaml
-          - id: check-ast
-          - id: check-merge-conflict
-          - id: check-added-large-files
-          - id: check-case-conflict
-    - repo: https://github.com/adrienverge/yamllint.git
-      rev: v1.21.0
+    - repo: https://github.com/sirosen/texthooks
+      rev: 0.6.3
       hooks:
-          - id: yamllint
-            args: [--format, parsable, --strict]
+          - id: fix-spaces
+    - repo: https://github.com/sirosen/texthooks
+      rev: 0.6.3
+      hooks:
+          - id: forbid-bidi-controls
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.5.0
+      hooks:
+          - id: mixed-line-ending
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.5.0
+      hooks:
+          - id: destroyed-symlinks
+    - repo: https://github.com/syntaqx/git-hooks
+      rev: v0.0.18
+      hooks:
+          - id: forbid-binary
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.5.0
+      hooks:
+          - id: check-case-conflict
+    - repo: https://github.com/sirosen/texthooks
+      rev: 0.6.3
+      hooks:
+          - id: alphabetize-codeowners
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.5.0
+      hooks:
+          - id: check-merge-conflict
+    - repo: https://github.com/pre-commit/pygrep-hooks
+      rev: f26714c5fa7ebb2af74d87a1a9ebd691a3f4c889
+      hooks:
+          - id: python-check-blanket-noqa
+    - repo: https://github.com/pre-commit/pygrep-hooks
+      rev: f26714c5fa7ebb2af74d87a1a9ebd691a3f4c889
+      hooks:
+          - id: python-check-blanket-type-ignore
+    - repo: https://github.com/pre-commit/pygrep-hooks
+      rev: f26714c5fa7ebb2af74d87a1a9ebd691a3f4c889
+      hooks:
+          - id: python-check-mock-methods
+    - repo: https://github.com/pre-commit/pygrep-hooks
+      rev: f26714c5fa7ebb2af74d87a1a9ebd691a3f4c889
+      hooks:
+          - id: python-no-eval
+    - repo: https://github.com/pre-commit/pygrep-hooks
+      rev: f26714c5fa7ebb2af74d87a1a9ebd691a3f4c889
+      hooks:
+          - id: python-no-log-warn
+    - repo: https://github.com/pre-commit/pygrep-hooks
+      rev: f26714c5fa7ebb2af74d87a1a9ebd691a3f4c889
+      hooks:
+          - id: python-use-type-annotations
+    - repo: https://github.com/asottile/add-trailing-comma
+      rev: v3.1.0
+      hooks:
+          - id: add-trailing-comma
     - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
-      rev: 0.2.1
+      rev: 0.2.3
       hooks:
           - id: yamlfmt
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.5.0
+      hooks:
+          - id: check-toml
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.5.0
+      hooks:
+          - id: check-yaml
     - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-      rev: 129dd8a
+      rev: v2.12.0
       hooks:
           - id: pretty-format-toml
-            args: [--autofix]
+            args:
+                - --autofix
+    - repo: https://github.com/executablebooks/mdformat
+      rev: 0.7.17
+      hooks:
+          - id: mdformat
     - repo: https://gitlab.com/smop/pre-commit-hooks
-      rev: df034f88cf92b394e6f00a78fa97a2aa4e270e60
+      rev: v1.0.0
       hooks:
           - id: check-poetry
+    - repo: https://github.com/frnmst/md-toc
+      rev: 8.2.2
+      hooks:
+          - id: md-toc
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.5.0
+      hooks:
+          - id: detect-private-key
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.5.0
+      hooks:
+          - id: debug-statements
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.5.0
+      hooks:
+          - id: check-docstring-first
+    - repo: https://github.com/asottile/pyupgrade
+      rev: v3.15.0
+      hooks:
+          - id: pyupgrade
+    - repo: https://github.com/adrienverge/yamllint.git
+      rev: v1.33.0
+      hooks:
+          - id: yamllint
+            args:
+                - --format
+                - parsable
+                - --strict
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.5.0
+      hooks:
+          - id: check-ast
+    - repo: https://github.com/hadialqattan/pycln
+      rev: v2.4.0
+      hooks:
+          - id: pycln
+    - repo: https://github.com/PyCQA/docformatter
+      rev: v1.7.5
+      hooks:
+          - id: docformatter
+            additional_dependencies:
+                - .[tomli]
+    - repo: https://github.com/dannysepler/rm_unneeded_f_str
+      rev: v0.2.0
+      hooks:
+          - id: rm-unneeded-f-str
+    - repo: https://github.com/mxr/unkey
+      rev: v0.0.1
+      hooks:
+          - id: unkey
+    - repo: https://github.com/MarcoGorelli/absolufy-imports
+      rev: v0.3.1
+      hooks:
+          - id: absolufy-imports
+    - repo: https://github.com/hakancelikdev/unimport
+      rev: stable
+      hooks:
+          - id: unimport
+            args:
+                - --include-star-import
+                - --ignore-init
+                - --gitignore
+    - repo: https://github.com/MarcoGorelli/auto-walrus
+      rev: v0.2.1
+      hooks:
+          - id: auto-walrus
+    - repo: https://github.com/regebro/pyroma
+      rev: '4.2'
+      hooks:
+          - id: pyroma
+    - repo: https://github.com/PyCQA/autoflake
+      rev: v2.2.1
+      hooks:
+          - id: autoflake
+            args:
+                - --remove-all-unused-imports
+                - --remove-unused-variables
+    - repo: https://github.com/jendrikseipp/vulture
+      rev: v2.10
+      hooks:
+          - id: vulture
+            args:
+                - .
     - repo: https://github.com/charliermarsh/ruff-pre-commit
-      rev: v0.1.9
+      rev: v0.1.11
       hooks:
           - id: ruff
             args:
                 - --select
                 - ALL
                 - --ignore
-                - DTZ001,DTZ005,DTZ007,S101,E501,T201,D213,D203,ARG001,PLR0913
+                - DTZ001,DTZ005,DTZ007,S101,E501,T201,D213,D203,PLR0913
                 - --fix
+    - repo: https://github.com/charliermarsh/ruff-pre-commit
+      rev: v0.1.11
+      hooks:
           - id: ruff-format
+    - repo: local
+      hooks:
+          - id: coverage
+            name: Check coverage
+            description: Ensure all code is covered
+            language: system
+            entry: coverage
+            args:
+                - report
+                - --fail-under=100
+            types:
+                - python
+            pass_filenames: false
     - repo: local
       hooks:
           - id: mypy
             name: Check types
             description: This hook runs MyPy with strict settings
-            entry: poetry
             language: system
-            types: [python]
+            entry: poetry
             args:
                 - run
                 - mypy
                 - --strict
                 - .
+            types:
+                - python
             pass_filenames: false
+    - repo: local
+      hooks:
           - id: pytest
             name: Check passing tests & TypeGuard usage
             description: This hook runs PyTest with TypeGuard & coverage enabled
-            entry: poetry
             language: system
-            types: [python]
+            entry: poetry
             args:
                 - run
                 - pytest
+            types:
+                - python
             pass_filenames: false
-          - id: coverage
-            name: Check coverage
-            description: Ensure all code is covered
-            entry: coverage
-            language: system
+    - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
+      rev: v1.3.2
+      hooks:
+          - id: python-safety-dependencies-check
+    - repo: https://github.com/PyCQA/bandit
+      rev: 1.7.6
+      hooks:
+          - id: bandit
+            additional_dependencies:
+                - .[toml]
             args:
-                - report
-                - --fail-under=100
-            types: [python]
-            pass_filenames: false
+                - -c
+                - pyproject.toml
+    - repo: https://github.com/gitleaks/gitleaks
+      rev: v8.18.1
+      hooks:
+          - id: gitleaks
+    - repo: https://github.com/sirwart/ripsecrets
+      rev: v0.1.7
+      hooks:
+          - id: ripsecrets
+    - repo: https://github.com/codespell-project/codespell
+      rev: v2.2.6
+      hooks:
+          - id: codespell
+    - repo: https://github.com/crate-ci/typos
+      rev: v1.17.0
+      hooks:
+          - id: typos
+    - repo: https://github.com/streetsidesoftware/cspell-cli
+      rev: v8.3.0
+      hooks:
+          - id: cspell
+    - repo: local
+      hooks:
           - id: version-bumped
             name: Version Bumped
             description: Ensure version has been bumped
-            entry: poetry
             language: system
-            types: [python]
+            entry: poetry
             args:
                 - run
                 - python
                 - hooks/version_bumped.py
+            types:
+                - python
             pass_filenames: false
+    - repo: https://github.com/mattlqx/pre-commit-sign
+      rev: v1.1.3
+      hooks:
+          - id: sign-commit

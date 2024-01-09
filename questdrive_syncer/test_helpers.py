@@ -7,7 +7,7 @@ from unittest.mock import mock_open
 import pytest
 from pytest_mock import MockerFixture
 
-from .helpers import LockError, has_enough_free_space, lock
+from questdrive_syncer.helpers import LockError, has_enough_free_space, lock
 
 
 def test_has_enough_free_space_calls_mkdir(mocker: MockerFixture) -> None:

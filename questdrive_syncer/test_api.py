@@ -7,13 +7,13 @@ from typing import TYPE_CHECKING
 import httpx
 import pytest
 
-from .api import (
+from questdrive_syncer.api import (
     fetch_homepage_html,
     fetch_video_list_html,
     is_online,
     update_actively_recording,
 )
-from .structures import MissingVideoError, Video
+from questdrive_syncer.structures import MissingVideoError, Video
 
 if TYPE_CHECKING:  # pragma: no cover
     from pytest_httpx import HTTPXMock
@@ -47,10 +47,7 @@ def test_fetch_video_list_html(httpx_mock: HTTPXMock) -> None:
     """fetch_video_list_html() returns the URL & HTML."""
     httpx_mock.add_response(text="html")
 
-    assert fetch_video_list_html() == (
-        "https://example.com/list/storage/emulated/0/Oculus/VideoShots/",
-        "html",
-    )
+    assert fetch_video_list_html() == "html"
 
 
 def test_fetch_homepage_html(httpx_mock: HTTPXMock) -> None:
@@ -70,7 +67,6 @@ def test_update_actively_recording_handles_unchanged() -> None:
         datetime(2024, 1, 1, 11, 12, 13),
         datetime(2024, 1, 1, 12, 13, 14),
         2345,
-        "from_url",
     )
     update_actively_recording(
         [video],
@@ -87,7 +83,6 @@ def test_update_actively_recording_updates() -> None:
         datetime(2024, 1, 1, 11, 12, 13),
         datetime(2024, 1, 1, 12, 13, 14),
         2345,
-        "from_url",
     )
     update_actively_recording(
         [video],
@@ -98,7 +93,6 @@ def test_update_actively_recording_updates() -> None:
                 datetime(2024, 1, 1, 11, 12, 13),
                 datetime(2024, 1, 1, 12, 13, 15),
                 2345,
-                "from_url",
             ),
         ],
     )
@@ -113,7 +107,6 @@ def test_update_actively_recording_throws_if_video_missing() -> None:
         datetime(2024, 1, 1, 11, 12, 13),
         datetime(2024, 1, 1, 12, 13, 14),
         2345,
-        "from_url",
     )
     with pytest.raises(MissingVideoError) as exc_info:
         update_actively_recording([video], [])

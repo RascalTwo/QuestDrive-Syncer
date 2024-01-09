@@ -8,11 +8,11 @@ from typing import TYPE_CHECKING, Iterator
 import httpx
 import rich.progress
 
-from .config import CONFIG
-from .helpers import has_enough_free_space
+from questdrive_syncer.config import CONFIG
+from questdrive_syncer.helpers import has_enough_free_space
 
 if TYPE_CHECKING:  # pragma: no cover
-    from .structures import Video
+    from questdrive_syncer.structures import Video
 
 
 def download_and_delete_videos(
@@ -127,8 +127,7 @@ def download_and_delete_video(
         yield f'"{video.filename}" is actively recording, not deleting'
         return
 
-    content_length_diff = downloaded_byte_count - expected_byte_count
-    if content_length_diff:
+    if content_length_diff := downloaded_byte_count - expected_byte_count:
         if content_length_diff > 0:
             yield f'Received {content_length_diff} bytes more than expected during the download of "{video.filename}"'
 
@@ -141,8 +140,7 @@ def download_and_delete_video(
     if download:
         written_length = Path(video_output_filepath).stat().st_size
 
-    written_length_diff = downloaded_byte_count - written_length
-    if written_length_diff:
+    if written_length_diff := downloaded_byte_count - written_length:
         if written_length_diff > 0:
             yield f'Wrote {written_length_diff} bytes more than received during the download of "{video.filename}"'
 

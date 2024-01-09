@@ -2,23 +2,23 @@
 import sys
 import time
 
-from .api import (
+from questdrive_syncer.api import (
     fetch_homepage_html,
     fetch_video_list_html,
     is_online,
     update_actively_recording,
 )
-from .config import CONFIG
-from .constants import (
+from questdrive_syncer.config import CONFIG
+from questdrive_syncer.constants import (
     ACTIVELY_RECORDING_EXIT_CODE,
     FAILURE_EXIT_CODE,
     NOT_ENOUGH_BATTERY_EXIT_CODE,
     QUESTDRIVE_POLL_RATE_MINUTES,
     TOO_MUCH_SPACE_EXIT_CODE,
 )
-from .download import download_and_delete_videos
-from .helpers import lock
-from .parsers import parse_homepage_html, parse_video_list_html
+from questdrive_syncer.download import download_and_delete_videos
+from questdrive_syncer.helpers import lock
+from questdrive_syncer.parsers import parse_homepage_html, parse_video_list_html
 
 
 @lock(mode="fail")
@@ -51,11 +51,11 @@ def main() -> None:
             )
             sys.exit(NOT_ENOUGH_BATTERY_EXIT_CODE)
 
-    videos = parse_video_list_html(*fetch_video_list_html())
+    videos = parse_video_list_html(fetch_video_list_html())
     time.sleep(1)
     print(f"Found {len(videos)} video{'' if len(videos) == 1 else 's'}:")
 
-    update_actively_recording(videos, parse_video_list_html(*fetch_video_list_html()))
+    update_actively_recording(videos, parse_video_list_html(fetch_video_list_html()))
 
     videos = sorted(
         videos,

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from .structures import Video
+from questdrive_syncer.structures import Video
 
 
 def raw_size_to_mb(raw_size: str, unit: str) -> float:
@@ -21,7 +21,7 @@ def parse_homepage_html(html: str) -> tuple[int, float]:
     )
 
 
-def parse_video_list_html(from_url: str, html: str) -> list[Video]:
+def parse_video_list_html(html: str) -> list[Video]:
     """Parse the video list HTML into a list of videos."""
     table_html = html.split("<tbody>")[1].split("</tbody>")[0]
 
@@ -48,7 +48,6 @@ def parse_video_list_html(from_url: str, html: str) -> list[Video]:
                 created_at=created_at,
                 modified_at=modified_at,
                 mb_size=mb_size,
-                listing_url=from_url,
             ),
         )
     return videos

@@ -12,7 +12,6 @@ class Video:
     created_at: datetime
     modified_at: datetime
     mb_size: float
-    listing_url: str
     actively_recording: bool = False
 
     def __str__(self: "Video") -> str:

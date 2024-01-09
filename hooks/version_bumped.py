@@ -1,14 +1,20 @@
 """Ensure the version in pyproject.toml has been increased."""
 from __future__ import annotations
 
-import subprocess
+import subprocess  # nosec B404
 import sys
+from pathlib import Path
 
 
 def get_old_and_new_versions() -> None | tuple[list[int], list[int]]:
     """Return the staged old and new versions."""
-    stdout = subprocess.run(
-        ["git", "diff", "--staged", "pyproject.toml"],  # noqa: S603,S607
+    stdout = subprocess.run(  # nosec B603, B607
+        [  # noqa: S603, S607
+            "git",
+            "diff",
+            "--staged",
+            (Path(__file__).parent.parent / "pyproject.toml").absolute(),
+        ],
         capture_output=True,
         text=True,
         check=False,

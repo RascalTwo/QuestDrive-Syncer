@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from .version_bumped import check, get_old_and_new_versions, is_version_bumped
+from hooks.version_bumped import check, get_old_and_new_versions, is_version_bumped
 
 if TYPE_CHECKING:  # pragma: no cover
     from unittest.mock import Mock
@@ -52,7 +52,7 @@ def test_is_version_bumped(
 
 
 def test_check_fails_if_no_versions(mocker: MockerFixture) -> None:
-    """check() fails if there are no versions."""
+    """Check() function fails if there are no versions."""
     mock_print = make_check_mocks(mocker, None, is_version_bumped=True)
 
     with pytest.raises(SystemExit) as e:
@@ -67,7 +67,7 @@ def test_check_fails_if_no_versions(mocker: MockerFixture) -> None:
 def test_check_fails_if_versions_not_bumped(
     mocker: MockerFixture,
 ) -> None:
-    """check() fails if the versions are not bumped."""
+    """Check() fails if the versions are not bumped."""
     mock_print = make_check_mocks(
         mocker,
         ([0, 1, 2], [0, 1, 2]),
@@ -84,7 +84,7 @@ def test_check_fails_if_versions_not_bumped(
 
 
 def test_check_prints_version_changes_if_successful(mocker: MockerFixture) -> None:
-    """check() prints the two versions if successful."""
+    """Check() prints the two versions if successful."""
     mock_print = make_check_mocks(
         mocker,
         ([0, 1, 2], [0, 1, 3]),

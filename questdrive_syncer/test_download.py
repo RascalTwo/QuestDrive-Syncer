@@ -9,8 +9,11 @@ from unittest.mock import mock_open
 
 import pytest
 
-from .download import download_and_delete_video, download_and_delete_videos
-from .structures import Video
+from questdrive_syncer.download import (
+    download_and_delete_video,
+    download_and_delete_videos,
+)
+from questdrive_syncer.structures import Video
 
 if TYPE_CHECKING:  # pragma: no cover
     from pytest_httpx import HTTPXMock
@@ -64,7 +67,6 @@ def test_download_and_delete_requests_correct_url(
                 datetime(2024, 1, 1, 11, 12, 13),
                 datetime(2024, 1, 1, 12, 13, 14),
                 2345,
-                "from_url",
             ),
         ),
     )
@@ -96,7 +98,6 @@ def test_download_and_delete_writes_to_correct_path(
                 datetime(2024, 1, 1, 11, 12, 13),
                 datetime(2024, 1, 1, 12, 13, 14),
                 2345,
-                "from_url",
             ),
         ),
     )
@@ -130,7 +131,6 @@ def test_download_and_delete_calls_stat_on_written_file(
                 datetime(2024, 1, 1, 11, 12, 13),
                 datetime(2024, 1, 1, 12, 13, 14),
                 2345,
-                "from_url",
             ),
         ),
     )
@@ -157,7 +157,6 @@ def test_download_and_delete_calls_delete_url(
                 datetime(2024, 1, 1, 11, 12, 13),
                 datetime(2024, 1, 1, 12, 13, 14),
                 2345,
-                "from_url",
             ),
         ),
     )
@@ -167,7 +166,7 @@ def test_download_and_delete_calls_delete_url(
     assert str(request.url) == "https://example.com/delete/full%2Fpathtofile.mp4"
 
 
-def test_download_and_delete_doesnt_delete_actively_recording(
+def test_download_and_delete_does_not_delete_actively_recording(
     httpx_mock: HTTPXMock,
     mocker: MockerFixture,
 ) -> None:
@@ -184,7 +183,6 @@ def test_download_and_delete_doesnt_delete_actively_recording(
                 datetime(2024, 1, 1, 11, 12, 13),
                 datetime(2024, 1, 1, 12, 13, 14),
                 2345,
-                "from_url",
                 actively_recording=True,
             ),
         ),
@@ -192,7 +190,7 @@ def test_download_and_delete_doesnt_delete_actively_recording(
     assert len(httpx_mock.get_requests()) == 2  # noqa: PLR2004
 
 
-def test_download_and_delete_doesnt_delete_if_expecting_more_content(
+def test_download_and_delete_does_not_delete_if_expecting_more_content(
     httpx_mock: HTTPXMock,
     mocker: MockerFixture,
 ) -> None:
@@ -209,7 +207,6 @@ def test_download_and_delete_doesnt_delete_if_expecting_more_content(
                 datetime(2024, 1, 1, 11, 12, 13),
                 datetime(2024, 1, 1, 12, 13, 14),
                 2345,
-                "from_url",
             ),
         ),
     ) == [
@@ -220,7 +217,7 @@ def test_download_and_delete_doesnt_delete_if_expecting_more_content(
     assert len(httpx_mock.get_requests()) == 2  # noqa: PLR2004
 
 
-def test_download_and_delete_doesnt_delete_if_received_more_content_then_expected(
+def test_download_and_delete_does_not_delete_if_received_more_content_then_expected(
     httpx_mock: HTTPXMock,
     mocker: MockerFixture,
 ) -> None:
@@ -237,7 +234,6 @@ def test_download_and_delete_doesnt_delete_if_received_more_content_then_expecte
                 datetime(2024, 1, 1, 11, 12, 13),
                 datetime(2024, 1, 1, 12, 13, 14),
                 2345,
-                "from_url",
             ),
         ),
     ) == [
@@ -248,7 +244,7 @@ def test_download_and_delete_doesnt_delete_if_received_more_content_then_expecte
     assert len(httpx_mock.get_requests()) == 2  # noqa: PLR2004
 
 
-def test_download_and_delete_doesnt_delete_if_wrote_less_then_received(
+def test_download_and_delete_does_not_delete_if_wrote_less_then_received(
     httpx_mock: HTTPXMock,
     mocker: MockerFixture,
 ) -> None:
@@ -265,7 +261,6 @@ def test_download_and_delete_doesnt_delete_if_wrote_less_then_received(
                 datetime(2024, 1, 1, 11, 12, 13),
                 datetime(2024, 1, 1, 12, 13, 14),
                 2345,
-                "from_url",
             ),
         ),
     ) == [
@@ -276,7 +271,7 @@ def test_download_and_delete_doesnt_delete_if_wrote_less_then_received(
     assert len(httpx_mock.get_requests()) == 2  # noqa: PLR2004
 
 
-def test_download_and_delete_doesnt_delete_if_wrote_more_then_received(
+def test_download_and_delete_does_not_delete_if_wrote_more_then_received(
     httpx_mock: HTTPXMock,
     mocker: MockerFixture,
 ) -> None:
@@ -293,7 +288,6 @@ def test_download_and_delete_doesnt_delete_if_wrote_more_then_received(
                 datetime(2024, 1, 1, 11, 12, 13),
                 datetime(2024, 1, 1, 12, 13, 14),
                 2345,
-                "from_url",
             ),
         ),
     ) == [
@@ -304,7 +298,7 @@ def test_download_and_delete_doesnt_delete_if_wrote_more_then_received(
     assert len(httpx_mock.get_requests()) == 2  # noqa: PLR2004
 
 
-def test_download_and_delete_doesnt_delete_if_delete_is_false(
+def test_download_and_delete_does_not_delete_if_delete_is_false(
     httpx_mock: HTTPXMock,
     mocker: MockerFixture,
 ) -> None:
@@ -321,7 +315,6 @@ def test_download_and_delete_doesnt_delete_if_delete_is_false(
                 datetime.now(),
                 datetime.now(),
                 2345,
-                "from_url",
             ),
             delete=False,
         ),
@@ -330,7 +323,7 @@ def test_download_and_delete_doesnt_delete_if_delete_is_false(
     assert len(httpx_mock.get_requests()) == 2  # noqa: PLR2004
 
 
-def test_download_and_delete_doesnt_download_if_download_is_false(
+def test_download_and_delete_does_not_download_if_download_is_false(
     httpx_mock: HTTPXMock,
     mocker: MockerFixture,
 ) -> None:
@@ -347,7 +340,6 @@ def test_download_and_delete_doesnt_download_if_download_is_false(
                 datetime.now(),
                 datetime.now(),
                 2345,
-                "from_url",
             ),
             download=False,
         ),
@@ -404,7 +396,6 @@ videos = [
         datetime.now(),
         datetime.now(),
         100,
-        "from_url",
     ),
     Video(
         "full%2Fpathtofile2.mp4",
@@ -412,7 +403,6 @@ videos = [
         datetime.now(),
         datetime.now(),
         200,
-        "from_url",
     ),
 ]
 
@@ -470,7 +460,7 @@ def test_download_and_delete_videos_creates_initial_tasks(
     mock_add_task.assert_called_with("Total", total=300000000, filename="Total")
 
 
-def test_download_and_delete_videos_doesnt_download_if_not_enough_free_space(
+def test_download_and_delete_videos_does_not_download_if_not_enough_free_space(
     mocker: MockerFixture,
 ) -> None:
     """download_and_delete_videos() doesn't download if there is not enough free space."""

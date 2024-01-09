@@ -3,11 +3,11 @@ from __future__ import annotations
 
 import httpx
 
-from .config import CONFIG
-from .constants import (
+from questdrive_syncer.config import CONFIG
+from questdrive_syncer.constants import (
     VIDEO_SHOTS_PATH,
 )
-from .structures import MissingVideoError, Video
+from questdrive_syncer.structures import MissingVideoError, Video
 
 
 def is_online() -> bool:
@@ -20,11 +20,9 @@ def is_online() -> bool:
         return response.status_code == httpx.codes.OK
 
 
-def fetch_video_list_html() -> tuple[str, str]:
+def fetch_video_list_html() -> str:
     """Fetch the URL and HTML of the video list."""
-    url = CONFIG.questdrive_url + VIDEO_SHOTS_PATH
-    response = httpx.get(url)
-    return url, response.text
+    return httpx.get(CONFIG.questdrive_url + VIDEO_SHOTS_PATH).text
 
 
 def fetch_homepage_html() -> str:

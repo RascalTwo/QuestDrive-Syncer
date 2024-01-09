@@ -6,8 +6,12 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from .parsers import parse_homepage_html, parse_video_list_html, raw_size_to_mb
-from .structures import Video
+from questdrive_syncer.parsers import (
+    parse_homepage_html,
+    parse_video_list_html,
+    raw_size_to_mb,
+)
+from questdrive_syncer.structures import Video
 
 if TYPE_CHECKING:  # pragma: no cover
     from pytest_mock import MockerFixture
@@ -60,7 +64,6 @@ html_expected_mappings = {
             datetime(2024, 1, 1, 11, 12, 13),
             datetime(2024, 1, 1, 12, 13, 14),
             2.345 * 1.048576,
-            "from_url",
         ),
     ],
     "gb": [
@@ -79,7 +82,6 @@ html_expected_mappings = {
             datetime(2024, 1, 1, 11, 12, 13),
             datetime(2024, 1, 1, 12, 13, 14),
             2345 * 1.048576,
-            "from_url",
         ),
     ],
 }
@@ -136,7 +138,6 @@ def test_parse_video_list_html(
     """parse_video_list_html function returns the expected list of Video objects."""
     assert (
         parse_video_list_html(
-            "from_url",
             html,
         )
         == expected

@@ -2,12 +2,33 @@
 build-backend = "poetry.core.masonry.api"
 requires = ["poetry-core"]
 
+[tool.bandit]
+skips = ["B101"]
+
+[tool.docformatter]
+wrap-summaries = 999
+
 [tool.poetry]
 authors = ["Rascal_Two <therealrascaltwo@gmail.com>"]
-description = ""
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Environment :: Console",
+  "Intended Audience :: End Users/Desktop",
+  "License :: OSI Approved :: MIT License",
+  "Natural Language :: English",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3.9",
+  "Topic :: Communications :: File Sharing",
+  "Topic :: Internet :: WWW/HTTP",
+  "Topic :: Utilities",
+  "Typing :: Typed"
+]
+description = "A tool to sync files from a device running QuestDrive to a local directory."
+keywords = ["questdrive", "httpx"]
+license = "MIT"
 name = "questdrive-syncer"
 readme = "README.md"
-version = "2.4.0"
+version = "2.4.1"
 
 [tool.poetry.dependencies]
 httpx = "^0.26.0"
@@ -25,3 +46,6 @@ pytest-httpx = "^0.28.0"
 pytest-mock = "^3.12.0"
 ruff = "^0.1.9"
 typeguard = "^4.1.5"
+
+[tool.poetry.urls]
+repository = "https://github.com/RascalTwo/QuestDrive-Syncer"

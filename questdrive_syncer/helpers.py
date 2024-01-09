@@ -6,7 +6,7 @@ import time
 from pathlib import Path
 from typing import Any, Callable, Literal
 
-from .config import CONFIG
+from questdrive_syncer.config import CONFIG
 
 
 def has_enough_free_space(mb_size: float) -> bool:
