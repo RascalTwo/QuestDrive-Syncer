@@ -6,6 +6,7 @@ import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal
 
 from rich_argparse import HelpPreviewAction, RichHelpFormatter
 
@@ -24,6 +25,8 @@ class Config:
     simple_output: bool = False
     only_run_if_space_less: float = float("inf")
     only_run_if_battery_above: int = 0
+    sort_by: Literal["mb_size" | "filename" | "created_at" | "modified_at"] = "mb_size"
+    sort_order: Literal["ascending" | "descending"] = "ascending"
 
 
 CONFIG = Config(questdrive_url="https://example.com/")
@@ -143,6 +146,18 @@ def parse_args(*args: str) -> Config:
         type=percentage,
         default=default_config.only_run_if_battery_above,
         help="Only run if QuestDrive reports a battery percentage above this value",
+    )
+    parser.add_argument(
+        "--sort-by",
+        choices=["filename", "created_at", "modified_at", "mb_size"],
+        default=default_config.sort_by,
+        help="Video attribute to sort by",
+    )
+    parser.add_argument(
+        "--sort-order",
+        choices=["ascending", "descending"],
+        default=default_config.sort_order,
+        help="Order to sort videos by",
     )
 
     config = Config(**vars(parser.parse_args(args)))

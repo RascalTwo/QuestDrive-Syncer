@@ -240,6 +240,70 @@ def test_parse_args_only_run_if_battery_above_must_within_0_100(
     )
 
 
+def test_parse_args_sort_by_default(mocker: MockerFixture) -> None:
+    """parse_args() returns the default sort_by."""
+    config = parse_args("--questdrive-url=url")
+
+    assert config.sort_by == "mb_size"
+
+
+@pytest.mark.parametrize(
+    "sort_by",
+    ["filename", "created_at", "modified_at", "mb_size"],
+)
+def test_parse_args_custom_sort_by(sort_by: str, mocker: MockerFixture) -> None:
+    """parse_args() returns the provided sort_by."""
+    config = parse_args("--questdrive-url=url", f"--sort-by={sort_by}")
+
+    assert config.sort_by == sort_by
+
+
+def test_parse_args_sort_by_must_be_valid(
+    mocker: MockerFixture,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """parse_args() prints an error message if --sort-by is invalid."""
+    with pytest.raises(SystemExit):
+        parse_args("--questdrive-url=url", "--sort-by=invalid")
+
+    assert (
+        "argument --sort-by: invalid choice: 'invalid' (choose from 'filename', 'created_at', 'modified_at', 'mb_size')"
+        in capsys.readouterr().err
+    )
+
+
+def test_parse_args_sort_order_default(mocker: MockerFixture) -> None:
+    """parse_args() returns the default sort_order."""
+    config = parse_args("--questdrive-url=url")
+
+    assert config.sort_order == "ascending"
+
+
+@pytest.mark.parametrize(
+    "sort_order",
+    ["ascending", "descending"],
+)
+def test_parse_args_custom_sort_order(sort_order: str, mocker: MockerFixture) -> None:
+    """parse_args() returns the provided sort_order."""
+    config = parse_args("--questdrive-url=url", f"--sort-order={sort_order}")
+
+    assert config.sort_order == sort_order
+
+
+def test_parse_args_sort_order_must_be_valid(
+    mocker: MockerFixture,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """parse_args() prints an error message if --sort-order is invalid."""
+    with pytest.raises(SystemExit):
+        parse_args("--questdrive-url=url", "--sort-order=invalid")
+
+    assert (
+        "argument --sort-order: invalid choice: 'invalid' (choose from 'ascending', 'descending')"
+        in capsys.readouterr().err
+    )
+
+
 def test_parse_args_default_minimum_free_space(mocker: MockerFixture) -> None:
     """parse_args() returns the default minimum_free_space_mb."""
     config = parse_args("--questdrive-url=url")

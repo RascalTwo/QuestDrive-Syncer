@@ -57,7 +57,11 @@ def main() -> None:
 
     update_actively_recording(videos, parse_video_list_html(*fetch_video_list_html()))
 
-    videos = sorted(videos, key=lambda video: video.mb_size)
+    videos = sorted(
+        videos,
+        key=lambda video: getattr(video, CONFIG.sort_by),
+        reverse=CONFIG.sort_order == "descending",
+    )
 
     if not CONFIG.run_while_actively_recording and any(
         video.actively_recording for video in videos
