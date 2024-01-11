@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from operator import itemgetter
+from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any
 from unittest.mock import mock_open
@@ -106,7 +107,7 @@ def test_download_and_delete_writes_to_correct_path(
     file = mocked_open()
     file.write.assert_called_once_with(one_mb)
     mock_utime.assert_called_once_with(
-        "output/filename-20240101-111213.mp4",
+        Path("output/filename-20240101-111213.mp4"),
         (
             datetime(2024, 1, 1, 11, 12, 13).timestamp(),
             datetime(2024, 1, 1, 12, 13, 14).timestamp(),

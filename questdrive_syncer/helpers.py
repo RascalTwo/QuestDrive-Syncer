@@ -30,7 +30,7 @@ def lock(
     mode: Literal["fail", "wait"] = "fail",
 ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """Lock the function so that it can only be run once at a time."""
-    lock_file = Path("/".join(__file__.split("/")[:-1]) + "/questdrive_syncer.lock")
+    lock_file = Path("/".join(__file__.split("/")[:-1])) / "questdrive_syncer.lock"
 
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         def wrapper(*args: Any, **kwargs: Any) -> Any:  # noqa: ANN401

@@ -98,14 +98,16 @@ def download_and_delete_video(
     download: bool = True,
 ) -> Iterator[float | int | str]:
     """Download and delete the video."""
-    url = CONFIG.questdrive_url + "download/" + video.filepath
-    video_output_filepath = f"{CONFIG.output_path}{video.filename}"
+    download_url = httpx.URL(CONFIG.questdrive_url).join(
+        str(Path("download") / video.filepath),
+    )
+    video_output_filepath = Path(CONFIG.output_path) / video.filename
 
-    head_response = httpx.head(url)
+    head_response = httpx.head(download_url)
     expected_byte_count = int(head_response.headers.get("Content-Length", 0))
     downloaded_byte_count = expected_byte_count
     if download:
-        with httpx.stream("GET", url) as response, Path(
+        with httpx.stream("GET", download_url) as response, Path(
             video_output_filepath,
         ).open("wb") as file:
             expected_byte_count = int(response.headers.get("Content-Length", 0))
@@ -150,4 +152,8 @@ def download_and_delete_video(
         return
 
     if delete:
-        httpx.get(CONFIG.questdrive_url + "delete/" + video.filepath)
+        httpx.get(
+            httpx.URL(CONFIG.questdrive_url).join(
+                str(Path("delete") / video.filepath),
+            ),
+        )

@@ -22,7 +22,7 @@ def is_online() -> bool:
 
 def fetch_video_list_html() -> str:
     """Fetch the URL and HTML of the video list."""
-    return httpx.get(CONFIG.questdrive_url + VIDEO_SHOTS_PATH).text
+    return httpx.get(httpx.URL(CONFIG.questdrive_url).join(VIDEO_SHOTS_PATH)).text
 
 
 def fetch_homepage_html() -> str:
