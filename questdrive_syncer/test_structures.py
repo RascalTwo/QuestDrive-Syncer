@@ -4,7 +4,7 @@ from datetime import datetime
 from questdrive_syncer.structures import Video
 
 
-def test_video_string() -> None:
+def test_string() -> None:
     """String representation of a Video is correct."""
     assert (
         str(
@@ -20,7 +20,7 @@ def test_video_string() -> None:
     )
 
 
-def test_video_string_includes_actively_recording() -> None:
+def test_string_includes_actively_recording() -> None:
     """String representation of a Video includes "actively recording" if the Video is actively recording."""
     assert "(actively recording)" in str(
         Video(
@@ -34,7 +34,7 @@ def test_video_string_includes_actively_recording() -> None:
     )
 
 
-def test_video_application_name() -> None:
+def test_application_name() -> None:
     """Application name of a Video is correct."""
     assert (
         Video(
@@ -48,7 +48,7 @@ def test_video_application_name() -> None:
     )
 
 
-def test_video_duration() -> None:
+def test_duration() -> None:
     """Duration of a Video is correct."""
     assert Video(
         "full%2Fpathtofile.mp4",
