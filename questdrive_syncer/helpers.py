@@ -21,9 +21,11 @@ def has_enough_free_space(mb_size: float) -> bool:
 class LockError(Exception):
     """Raised when a lock is already in place."""
 
-    def __init__(self: LockError, pid: int) -> None:
+    def __init__(self: LockError, pid: int, lock_file_path: str) -> None:
         """Initialize the error."""
-        super().__init__(f"Another process ({pid}) is already running.")
+        super().__init__(
+            f'Another process ({pid}) is already running according to "{lock_file_path}" lockfile.',
+        )
 
 
 def lock(
@@ -37,7 +39,7 @@ def lock(
             if lock_file.exists():
                 if mode == "fail":
                     with lock_file.open("r") as f:
-                        raise LockError(int(f.read()))
+                        raise LockError(int(f.read()), str(lock_file.absolute()))
                 elif mode == "wait":
                     while lock_file.exists():
                         time.sleep(1)
