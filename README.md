@@ -27,6 +27,14 @@ Other notable usages include the built-in `argparse` for CLI parsing, `httpx` fo
 
 The most valuable `pytest` plugins used are `pytest-cov` for coverage, `pytest-mock` for reasonable mocking, and `pytest-network` to ensure all network requests are mocked.
 
+### Development
+
+To perform all checks manually, one can run the following:
+
+```shell
+poetry run pre-commit run --all-files
+```
+
 ### Usage
 
 ## Pre-requisites

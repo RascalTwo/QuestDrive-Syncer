@@ -21,6 +21,7 @@ if TYPE_CHECKING:  # pragma: no cover
     ("raw_size", "unit", "expected"),
     [
         ("2.345", "MB", 2.45891072),
+        ("1,012.99", "MB", 1062.19700224),
         ("2.345", "GB", 2458.91072),
     ],
 )

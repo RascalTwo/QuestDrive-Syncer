@@ -8,7 +8,7 @@ from questdrive_syncer.structures import Video
 
 def raw_size_to_mb(raw_size: str, unit: str) -> float:
     """Convert a raw size & unit to MB."""
-    return float(raw_size) * (1000 if unit == "GB" else 1) * 1.048576
+    return float(raw_size.replace(",", "")) * (1000 if unit == "GB" else 1) * 1.048576
 
 
 def parse_homepage_html(html: str) -> tuple[int, float]:
